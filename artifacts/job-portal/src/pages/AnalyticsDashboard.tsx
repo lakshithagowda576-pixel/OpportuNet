@@ -6,11 +6,23 @@ import { useTranslation } from "react-i18next";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 
+import { apiFetch } from "@/lib/api-client";
+
+interface AnalyticsStats {
+  totalApplications: number;
+  totalJobs: number;
+  pendingApplications: number;
+  offeredApplications: number;
+  byStatus: Record<string, number>;
+  byCategory: Record<string, number>;
+}
+
 export default function AnalyticsDashboard() {
   const { t } = useTranslation();
   
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ["/api/admin/stats"],
+  const { data: stats, isLoading } = useQuery<AnalyticsStats>({
+    queryKey: ["admin-stats"],
+    queryFn: () => apiFetch("/admin/stats").then((r: Response) => r.json()),
   });
 
   if (isLoading) {

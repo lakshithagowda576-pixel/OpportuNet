@@ -55,7 +55,7 @@ export default function JobAlerts() {
 
   const { data: alerts = [], isLoading } = useQuery({
     queryKey: ["job-alerts"],
-    queryFn: () => apiFetch("/job-alerts").then(r => r.json()),
+    queryFn: () => apiFetch("/job-alerts").then((r: Response) => r.json()),
   })
 
   const createMutation = useMutation({
@@ -71,7 +71,7 @@ export default function JobAlerts() {
           },
           frequency: data.frequency,
         }),
-      }).then(r => r.json())
+      }).then((r: Response) => r.json())
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["job-alerts"] })
@@ -103,7 +103,7 @@ export default function JobAlerts() {
       return apiFetch(`/job-alerts/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),
-      }).then(r => r.json())
+      }).then((r: Response) => r.json())
     },
     onSuccess: (_, { data }) => {
       queryClient.invalidateQueries({ queryKey: ["job-alerts"] })

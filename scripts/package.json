@@ -6,7 +6,9 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "seed": "tsx ./src/seed.ts",
+    "mega_seed": "tsx ./src/mega_seed.ts",
     "seed_pre_register_jobs": "tsx ./src/seed_pre_register_jobs.ts",
+    "seed_active_apps": "tsx ./src/seed_active_applications.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

@@ -189,7 +189,17 @@ export function JobCard({ job, applicantCount }: JobCardProps) {
                 if (isFuture) {
                   setShowPreRegister(true);
                 } else {
-                  window.open(applyUrl, "_blank");
+                  // Open link in a new tab safely
+                  try {
+                    const a = document.createElement('a');
+                    a.href = applyUrl;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.click();
+                  } catch (e) {
+                    const newWin = window.open(applyUrl, '_blank');
+                    if (newWin) newWin.opener = null;
+                  }
                 }
               }}
               className={cn(
@@ -391,7 +401,7 @@ export function JobCard({ job, applicantCount }: JobCardProps) {
 
             <div className="pt-4 border-t border-border">
               <button
-                onClick={() => isFuture ? (setShowDetails(false), setShowPreRegister(true)) : (hasExternalApply ? window.open(externalApplyUrl, "_blank") : null)}
+                onClick={() => isFuture ? (setShowDetails(false), setShowPreRegister(true)) : (hasExternalApply ? (function(){ try { const a = document.createElement('a'); a.href = externalApplyUrl; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.click(); } catch(e){ const w = window.open(externalApplyUrl,'_blank'); if(w) w.opener = null;} })() : null)}
                 className={cn(
                   "w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base font-bold transition-all shadow-lg",
                   isClosed

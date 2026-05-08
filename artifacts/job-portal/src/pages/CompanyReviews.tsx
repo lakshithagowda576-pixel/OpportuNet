@@ -96,7 +96,7 @@ export default function CompanyReviews() {
 
   const { data: reviews = [], isLoading } = useQuery({
     queryKey: ["company-reviews", companyId],
-    queryFn: () => apiFetch(`/company-reviews/${companyId}`).then(r => r.json()),
+    queryFn: () => apiFetch(`/company-reviews/${companyId}`).then((r: Response) => r.json()),
     enabled: !!companyId,
   })
 
@@ -108,7 +108,7 @@ export default function CompanyReviews() {
           companyId,
           ...data,
         }),
-      }).then(r => r.json())
+      }).then((r: Response) => r.json())
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["company-reviews", companyId] })
@@ -138,7 +138,7 @@ export default function CompanyReviews() {
       return apiFetch(`/company-reviews/${reviewId}/vote`, {
         method: "POST",
         body: JSON.stringify({ voteType }),
-      }).then(r => r.json())
+      }).then((r: Response) => r.json())
     },
     onSuccess: (_, { reviewId, voteType }) => {
       queryClient.invalidateQueries({ queryKey: ["company-reviews", companyId] })

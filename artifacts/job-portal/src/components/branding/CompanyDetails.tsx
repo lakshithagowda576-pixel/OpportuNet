@@ -86,9 +86,9 @@ export const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company }) => {
       )}
 
       <div className="flex space-x-4 border-t border-gray-100 dark:border-gray-700 pt-6">
-        {company.linkedin && (
+        {company.socialLinks?.linkedin && (
           <a
-            href={company.linkedin}
+            href={company.socialLinks.linkedin}
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-[var(--brand-primary)] transition-colors"
@@ -97,16 +97,16 @@ export const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company }) => {
                 eventType: "company_social_clicked",
                 eventCategory: "CompanyDetails",
                 eventAction: "click_social",
-                metadata: { companyId: company.id, network: "linkedin", url: company.linkedin },
+                metadata: { companyId: company.id, network: "linkedin", url: company.socialLinks?.linkedin },
               });
             }}
           >
             <Linkedin className="w-6 h-6" />
           </a>
         )}
-        {company.twitter && (
+        {company.socialLinks?.twitter && (
           <a
-            href={company.twitter}
+            href={company.socialLinks.twitter}
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-[var(--brand-primary)] transition-colors"
@@ -115,16 +115,16 @@ export const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company }) => {
                 eventType: "company_social_clicked",
                 eventCategory: "CompanyDetails",
                 eventAction: "click_social",
-                metadata: { companyId: company.id, network: "twitter", url: company.twitter },
+                metadata: { companyId: company.id, network: "twitter", url: company.socialLinks?.twitter },
               });
             }}
           >
             <Twitter className="w-6 h-6" />
           </a>
         )}
-        {((company as any).github) && (
+        {company.socialLinks?.github && (
           <a
-            href={(company as any).github}
+            href={company.socialLinks.github}
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-[var(--brand-primary)] transition-colors"
@@ -133,7 +133,7 @@ export const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company }) => {
                 eventType: "company_social_clicked",
                 eventCategory: "CompanyDetails",
                 eventAction: "click_social",
-                metadata: { companyId: company.id, network: "github", url: (company as any).github },
+                metadata: { companyId: company.id, network: "github", url: company.socialLinks?.github },
               });
             }}
           >
