@@ -343,7 +343,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                     <Mail className="w-4 h-4" />
                   </div>
-                  support@opportunet.com
+                  lakshithajanhavi@gmail.com
                 </li>
                 <li className="flex items-center gap-3 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors group">
                   <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
