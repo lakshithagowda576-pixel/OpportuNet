@@ -65244,6 +65244,7 @@ __export(schema_exports, {
   createAnalyticsEventSchema: () => createAnalyticsEventSchema,
   createJobSourceSchema: () => createJobSourceSchema,
   createResumeSchema: () => createResumeSchema,
+  emailStatusEnum: () => emailStatusEnum,
   examResultsTable: () => examResultsTable,
   examsTable: () => examsTable,
   hrEmailsTable: () => hrEmailsTable,
@@ -76912,6 +76913,7 @@ var insertCompanySchema = createInsertSchema(companiesTable).omit({ id: true, cr
 
 // ../../lib/db/src/schema/job-alerts.ts
 var alertFrequencyEnum = pgEnum("alert_frequency", ["daily", "weekly"]);
+var emailStatusEnum = pgEnum("email_status", ["sent", "failed", "bounced"]);
 var jobAlertsTable = pgTable("job_alerts", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
@@ -76931,7 +76933,7 @@ var alertEmailsSentTable = pgTable("alert_emails_sent", {
   sentAt: timestamp("sent_at").defaultNow().notNull(),
   jobCount: integer("job_count").notNull().default(0),
   recipientEmail: text("recipient_email").notNull(),
-  status: pgEnum("email_status", ["sent", "failed", "bounced"])("status").notNull().default("sent"),
+  status: emailStatusEnum("status").notNull().default("sent"),
   errorMessage: text("error_message")
 });
 var insertJobAlertSchema = createInsertSchema(jobAlertsTable).omit({
@@ -77918,15 +77920,27 @@ var storage = import_multer.default.diskStorage({
 });
 var upload = (0, import_multer.default)({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
+  // 10MB limit for both resume and photo
   fileFilter: (req, file2, cb) => {
-    const allowedTypes = [".pdf", ".doc", ".docx"];
-    const ext = path.extname(file2.originalname).toLowerCase();
-    if (allowedTypes.includes(ext)) {
-      cb(null, true);
+    if (file2.fieldname === "resume") {
+      const allowedTypes = [".pdf", ".doc", ".docx"];
+      const ext = path.extname(file2.originalname).toLowerCase();
+      if (allowedTypes.includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only .pdf, .doc and .docx files are allowed for resume"));
+      }
+    } else if (file2.fieldname === "photo") {
+      const allowedTypes = [".jpg", ".jpeg", ".png"];
+      const ext = path.extname(file2.originalname).toLowerCase();
+      if (allowedTypes.includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only .jpg, .jpeg and .png files are allowed for photo"));
+      }
     } else {
-      cb(new Error("Only .pdf, .doc and .docx files are allowed"));
+      cb(new Error("Invalid file field"));
     }
   }
 });
@@ -78056,11 +78070,16 @@ router3.post("/applications", async (req, res) => {
   res.status(201).json(formattedApp);
   sendApplicationConfirmationEmail(app2.id);
 });
-router3.post("/applications/direct", upload.single("resume"), async (req, res) => {
+router3.post("/applications/direct", upload.fields([
+  { name: "resume", maxCount: 1 },
+  { name: "photo", maxCount: 1 }
+]), async (req, res) => {
   try {
     const user = await getSessionUser(req);
     const body = req.body;
-    const file2 = req.file;
+    const files = req.files;
+    const resumeFile = files?.resume?.[0];
+    const photoFile = files?.photo?.[0];
     if (user || body.applicantEmail) {
       const [existing] = await db.select().from(applicationsTable).where(
         and(
@@ -78078,14 +78097,18 @@ router3.post("/applications/direct", upload.single("resume"), async (req, res) =
       applicantName: body.applicantName,
       applicantEmail: body.applicantEmail,
       applicantPhone: body.applicantPhone,
+      age: body.age ? parseInt(body.age) : null,
+      college: body.college,
       currentLocation: body.currentLocation,
       yearsOfExperience: body.yearsOfExperience,
       currentCompany: body.currentCompany,
-      resumeUrl: file2 ? `/uploads/${file2.filename}` : body.resumeUrl || null,
+      resumeUrl: resumeFile ? `/uploads/${resumeFile.filename}` : body.resumeUrl || null,
+      photoUrl: photoFile ? `/uploads/${photoFile.filename}` : null,
       portfolioLink: body.portfolioLink,
       linkedinProfile: body.linkedinProfile,
       education: body.education,
       skills: body.skills,
+      digitalSignature: body.digitalSignature,
       coverLetter: body.coverLetter,
       status: "Pending",
       acceptedTerms: true

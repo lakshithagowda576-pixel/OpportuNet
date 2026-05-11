@@ -14,6 +14,7 @@ import { usersTable } from "./users";
 import { jobCategoryEnum } from "./jobs";
 
 export const alertFrequencyEnum = pgEnum("alert_frequency", ["daily", "weekly"]);
+export const emailStatusEnum = pgEnum("email_status", ["sent", "failed", "bounced"]);
 
 export const jobAlertsTable = pgTable("job_alerts", {
   id: serial("id").primaryKey(),
@@ -48,7 +49,7 @@ export const alertEmailsSentTable = pgTable("alert_emails_sent", {
   sentAt: timestamp("sent_at").defaultNow().notNull(),
   jobCount: integer("job_count").notNull().default(0),
   recipientEmail: text("recipient_email").notNull(),
-  status: pgEnum("email_status", ["sent", "failed", "bounced"])("status")
+  status: emailStatusEnum("status")
     .notNull()
     .default("sent"),
   errorMessage: text("error_message"),

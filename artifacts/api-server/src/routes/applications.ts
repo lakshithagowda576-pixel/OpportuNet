@@ -33,14 +33,26 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit for both resume and photo
   fileFilter: (req, file, cb) => {
-    const allowedTypes = [".pdf", ".doc", ".docx"];
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowedTypes.includes(ext)) {
-      cb(null, true);
+    if (file.fieldname === 'resume') {
+      const allowedTypes = [".pdf", ".doc", ".docx"];
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (allowedTypes.includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only .pdf, .doc and .docx files are allowed for resume"));
+      }
+    } else if (file.fieldname === 'photo') {
+      const allowedTypes = [".jpg", ".jpeg", ".png"];
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (allowedTypes.includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only .jpg, .jpeg and .png files are allowed for photo"));
+      }
     } else {
-      cb(new Error("Only .pdf, .doc and .docx files are allowed"));
+      cb(new Error("Invalid file field"));
     }
   },
 });
@@ -223,11 +235,16 @@ router.post("/applications", async (req, res) => {
   sendApplicationConfirmationEmail(app.id);
 });
 
-router.post("/applications/direct", upload.single("resume"), async (req, res) => {
+router.post("/applications/direct", upload.fields([
+  { name: 'resume', maxCount: 1 },
+  { name: 'photo', maxCount: 1 }
+]) as any, async (req, res) => {
   try {
     const user = await getSessionUser(req);
     const body = req.body;
-    const file = req.file;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    const resumeFile = files?.resume?.[0];
+    const photoFile = files?.photo?.[0];
 
     // Check if already applied
     if (user || body.applicantEmail) {
@@ -254,14 +271,18 @@ router.post("/applications/direct", upload.single("resume"), async (req, res) =>
         applicantName: body.applicantName,
         applicantEmail: body.applicantEmail,
         applicantPhone: body.applicantPhone,
+        age: body.age ? parseInt(body.age) : null,
+        college: body.college,
         currentLocation: body.currentLocation,
         yearsOfExperience: body.yearsOfExperience,
         currentCompany: body.currentCompany,
-        resumeUrl: file ? `/uploads/${file.filename}` : (body.resumeUrl || null),
+        resumeUrl: resumeFile ? `/uploads/${resumeFile.filename}` : (body.resumeUrl || null),
+        photoUrl: photoFile ? `/uploads/${photoFile.filename}` : null,
         portfolioLink: body.portfolioLink,
         linkedinProfile: body.linkedinProfile,
         education: body.education,
         skills: body.skills,
+        digitalSignature: body.digitalSignature,
         coverLetter: body.coverLetter,
         status: "Pending" as any,
         acceptedTerms: true,
