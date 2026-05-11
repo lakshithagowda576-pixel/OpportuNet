@@ -11,8 +11,8 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ApplyPage: React.FC = () => {
-  const [, params] = useRoute("/apply/:jobId");
-  const jobId = params?.jobId;
+  const [, params] = useRoute("/jobs/:id/apply");
+  const jobId = params?.id;
 
   // Fetch job details
   const { data: job, isLoading: isLoadingJob } = useQuery<Job>({
@@ -32,7 +32,7 @@ const ApplyPage: React.FC = () => {
         eventType: "application_page_view",
         eventCategory: "Application",
         eventAction: "view",
-        page: `/apply/${jobId}`,
+        page: `/jobs/${jobId}/apply`,
         metadata: { jobId, company: job.company, category: job.category },
       });
     }

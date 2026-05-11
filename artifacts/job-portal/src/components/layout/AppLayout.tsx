@@ -13,6 +13,7 @@ import { Calendar, Info, Star } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import JobAlertNotification from "@/components/JobAlertNotification";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -416,6 +417,9 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Daily Job Alerts for Logged-in Users */}
+      <JobAlertNotification />
     </div>
   );
 }
