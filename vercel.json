@@ -1,9 +1,9 @@
 {
   "version": 3,
-  "outputDirectory": "artifacts/job-portal/dist/public",
+  "outputDirectory": "OpportuNet/artifacts/job-portal/dist/public",
   "builds": [
     {
-      "src": "artifacts/job-portal/package.json",
+      "src": "OpportuNet/artifacts/job-portal/package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "dist/public"
@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/[[...all]].ts"
+      "dest": "/OpportuNet/api/[[...all]].ts"
     },
     {
       "src": "/(.*)",

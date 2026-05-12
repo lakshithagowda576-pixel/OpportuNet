@@ -7,6 +7,7 @@
     "install:all": "pnpm install",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck": "tsc --build && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
+    "start:api": "pnpm -C artifacts/api-server run start",
     "seed": "pnpm -C scripts run seed --env-file=.env",
     "seed_pre_register_jobs": "pnpm -C scripts run seed_pre_register_jobs --env-file=.env",
     "seed_active_apps": "pnpm -C scripts run seed_active_apps"
