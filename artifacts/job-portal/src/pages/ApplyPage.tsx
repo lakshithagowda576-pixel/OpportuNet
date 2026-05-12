@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRoute } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { trackEvent } from "@/lib/analytics";
-import { Job, Company } from "@workspace/db/schema";
+import { useGetJob } from "@workspace/api-client-react";
 import { CompanyBrandedLayout } from "@/components/branding/CompanyBrandedLayout";
 import { CompanyDetails } from "@/components/branding/CompanyDetails";
 import { JobDetailsSection } from "@/components/branding/JobDetailsSection";
@@ -12,19 +11,24 @@ import { Button } from "@/components/ui/button";
 
 const ApplyPage: React.FC = () => {
   const [, params] = useRoute("/jobs/:id/apply");
-  const jobId = params?.id;
+  const jobId = Number(params?.id);
+  const [company, setCompany] = useState<any>(null);
+  const [isLoadingCompany, setIsLoadingCompany] = useState(false);
 
-  // Fetch job details
-  const { data: job, isLoading: isLoadingJob } = useQuery<Job>({
-    queryKey: [`/api/jobs/${jobId}`],
-    enabled: !!jobId,
-  });
+  // Fetch job details using the proper API client hook
+  const { data: job, isLoading: isLoadingJob } = useGetJob(jobId);
 
-  // Fetch company branding details
-  const { data: company, isLoading: isLoadingCompany } = useQuery<Company>({
-    queryKey: [`/api/companies/${job?.company}`],
-    enabled: !!job?.company,
-  });
+  // Fetch company branding details when job is loaded
+  useEffect(() => {
+    if (job?.company) {
+      setIsLoadingCompany(true);
+      fetch(`/api/companies/${encodeURIComponent(job.company)}`)
+        .then(res => res.json())
+        .then(data => setCompany(data))
+        .catch(err => console.error("Failed to fetch company:", err))
+        .finally(() => setIsLoadingCompany(false));
+    }
+  }, [job?.company]);
 
   useEffect(() => {
     if (job) {

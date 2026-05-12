@@ -76780,7 +76780,9 @@ var applicationsTable = pgTable("applications", {
   currentLocation: text("current_location"),
   yearsOfExperience: text("years_of_experience"),
   currentCompany: text("current_company"),
+  age: integer("age"),
   resumeUrl: text("resume_url"),
+  photoUrl: text("photo_url"),
   portfolioLink: text("portfolio_link"),
   linkedinProfile: text("linkedin_profile"),
   skills: text("skills"),
@@ -78091,7 +78093,7 @@ router3.post("/applications/direct", upload.fields([
         return res.status(400).json({ error: "You have already applied for this job." });
       }
     }
-    const [app2] = await db.insert(applicationsTable).values({
+    const applicationPayload = {
       jobId: parseInt(body.jobId),
       userId: user?.id || null,
       applicantName: body.applicantName,
@@ -78112,7 +78114,8 @@ router3.post("/applications/direct", upload.fields([
       coverLetter: body.coverLetter,
       status: "Pending",
       acceptedTerms: true
-    }).returning();
+    };
+    const [app2] = await db.insert(applicationsTable).values(applicationPayload).returning();
     sendApplicationConfirmationEmail(app2.id);
     return res.status(201).json({
       success: true,

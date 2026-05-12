@@ -1,4 +1,5 @@
 export declare const alertFrequencyEnum: import("drizzle-orm/pg-core").PgEnum<["daily", "weekly"]>;
+export declare const emailStatusEnum: import("drizzle-orm/pg-core").PgEnum<["sent", "failed", "bounced"]>;
 export declare const jobAlertsTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "job_alerts";
     schema: undefined;
@@ -320,7 +321,6 @@ export declare const alertEmailsSentTable: import("drizzle-orm/pg-core").PgTable
 }>;
 export declare const insertJobAlertSchema: import("zod/v4").ZodObject<{
     name: import("zod/v4").ZodOptional<import("zod/v4").ZodNullable<import("zod/v4").ZodString>>;
-    isActive: import("zod/v4").ZodOptional<import("zod/v4").ZodBoolean>;
     userId: import("zod/v4").ZodInt;
     filters: import("zod/v4").ZodOptional<import("zod/v4").ZodNullable<import("zod/v4").ZodType<{
         categories?: string[];
@@ -355,21 +355,22 @@ export declare const insertJobAlertSchema: import("zod/v4").ZodObject<{
         daily: "daily";
         weekly: "weekly";
     }>>;
+    isActive: import("zod/v4").ZodOptional<import("zod/v4").ZodBoolean>;
 }, {
     out: {};
     in: {};
 }>;
 export declare const insertAlertEmailSchema: import("zod/v4").ZodObject<{
-    jobCount: import("zod/v4").ZodOptional<import("zod/v4").ZodInt>;
+    userId: import("zod/v4").ZodInt;
     status: import("zod/v4").ZodOptional<import("zod/v4").ZodEnum<{
         sent: "sent";
         failed: "failed";
         bounced: "bounced";
     }>>;
-    errorMessage: import("zod/v4").ZodOptional<import("zod/v4").ZodNullable<import("zod/v4").ZodString>>;
-    userId: import("zod/v4").ZodInt;
     alertId: import("zod/v4").ZodInt;
+    jobCount: import("zod/v4").ZodOptional<import("zod/v4").ZodInt>;
     recipientEmail: import("zod/v4").ZodString;
+    errorMessage: import("zod/v4").ZodOptional<import("zod/v4").ZodNullable<import("zod/v4").ZodString>>;
 }, {
     out: {};
     in: {};

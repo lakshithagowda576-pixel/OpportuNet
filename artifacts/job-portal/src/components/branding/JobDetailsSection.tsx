@@ -1,9 +1,16 @@
 import React from "react";
-import { Job } from "@workspace/db/schema";
 import { Briefcase, DollarSign, MapPin, Clock } from "lucide-react";
 
 interface JobDetailsSectionProps {
-  job: Job;
+  job: {
+    title: string;
+    category: string;
+    location: string;
+    salary: string;
+    shift: string;
+    description: string;
+    eligibility: string;
+  };
 }
 
 export const JobDetailsSection: React.FC<JobDetailsSectionProps> = ({ job }) => {

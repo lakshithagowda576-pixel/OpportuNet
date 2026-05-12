@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Building2, MapPin, Clock, IndianRupee, Users, ChevronRight, Calendar, Mail, ExternalLink } from "lucide-react";
+import { Building2, MapPin, Clock, IndianRupee, Users, ChevronRight, Calendar, Mail, ExternalLink, BookOpen } from "lucide-react";
 import { Job, JobCategory } from "@workspace/api-client-react";
 import { formatDate, cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -99,13 +99,38 @@ export function JobCard({ job, applicantCount, index = 0 }: JobCardProps) {
         </span>
       </div>
 
-      <div className="mt-auto pt-4 border-t border-border/60 flex items-center gap-2">
-        <Link 
-          href={`/jobs/${job.id}`}
-          className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group/btn"
+      <div className="mt-auto pt-4 border-t border-border/60 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Link
+          href={`/apply/${job.id}`}
+          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
         >
-          View Details & Apply
-          <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1.5 transition-transform" />
+          <BookOpen className="w-4 h-4" /> Apply Here
+        </Link>
+
+        {job.applicationLink ? (
+          <a
+            href={job.applicationLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-secondary text-foreground hover:bg-secondary/90 transition-all duration-300"
+          >
+            <ExternalLink className="w-4 h-4" /> Apply Now
+          </a>
+        ) : (
+          <Link
+            href={`/apply/${job.id}`}
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-secondary text-foreground hover:bg-secondary/90 transition-all duration-300"
+          >
+            <ExternalLink className="w-4 h-4" /> Apply Now
+          </Link>
+        )}
+
+        <Link
+          href={`/jobs/${job.id}`}
+          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-card text-muted-foreground hover:bg-secondary transition-all duration-300"
+        >
+          View Details
+          <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
     </motion.div>

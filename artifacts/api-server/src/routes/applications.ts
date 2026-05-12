@@ -263,30 +263,32 @@ router.post("/applications/direct", upload.fields([
       }
     }
 
+    const applicationPayload = {
+      jobId: parseInt(body.jobId),
+      userId: user?.id || null,
+      applicantName: body.applicantName,
+      applicantEmail: body.applicantEmail,
+      applicantPhone: body.applicantPhone,
+      age: body.age ? parseInt(body.age) : null,
+      college: body.college,
+      currentLocation: body.currentLocation,
+      yearsOfExperience: body.yearsOfExperience,
+      currentCompany: body.currentCompany,
+      resumeUrl: resumeFile ? `/uploads/${resumeFile.filename}` : (body.resumeUrl || null),
+      photoUrl: photoFile ? `/uploads/${photoFile.filename}` : null,
+      portfolioLink: body.portfolioLink,
+      linkedinProfile: body.linkedinProfile,
+      education: body.education,
+      skills: body.skills,
+      digitalSignature: body.digitalSignature,
+      coverLetter: body.coverLetter,
+      status: "Pending" as any,
+      acceptedTerms: true,
+    } as any;
+
     const [app] = await db
       .insert(applicationsTable)
-      .values({
-        jobId: parseInt(body.jobId),
-        userId: user?.id || null,
-        applicantName: body.applicantName,
-        applicantEmail: body.applicantEmail,
-        applicantPhone: body.applicantPhone,
-        age: body.age ? parseInt(body.age) : null,
-        college: body.college,
-        currentLocation: body.currentLocation,
-        yearsOfExperience: body.yearsOfExperience,
-        currentCompany: body.currentCompany,
-        resumeUrl: resumeFile ? `/uploads/${resumeFile.filename}` : (body.resumeUrl || null),
-        photoUrl: photoFile ? `/uploads/${photoFile.filename}` : null,
-        portfolioLink: body.portfolioLink,
-        linkedinProfile: body.linkedinProfile,
-        education: body.education,
-        skills: body.skills,
-        digitalSignature: body.digitalSignature,
-        coverLetter: body.coverLetter,
-        status: "Pending" as any,
-        acceptedTerms: true,
-      })
+      .values(applicationPayload)
       .returning();
 
     // Send confirmation email

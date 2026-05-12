@@ -142,94 +142,79 @@ export function JobCard({ job, applicantCount }: JobCardProps) {
           </div>
         </div>
 
-        <div className="mt-auto pt-4 border-t border-border/50 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="flex gap-2 w-full sm:w-auto">
+        <div className="mt-auto pt-4 border-t border-border/50 flex items-center gap-2">
+          <button
+            onClick={() => {
+              setShowDetails(true);
+              trackEvent({
+                eventType: "job_details_viewed",
+                eventCategory: "Job",
+                eventAction: "view_details",
+                metadata: { jobId: job.id, company: job.company, category: job.category },
+              });
+            }}
+            className="p-2.5 rounded-xl bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
+            title={t("jobs.viewDetails")}
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => {
+              fetch('/api/favorites', { method: 'POST', body: JSON.stringify({ jobId: job.id }) });
+              setSaved(true);
+              trackEvent({
+                eventType: "job_saved",
+                eventCategory: "Job",
+                eventAction: "save",
+                metadata: { jobId: job.id, company: job.company },
+              });
+            }}
+            className={cn(
+              "p-2.5 rounded-xl transition-all flex items-center gap-2 text-xs font-bold",
+              saved ? "bg-amber-100 text-amber-600" : "bg-secondary text-muted-foreground hover:bg-amber-50 hover:text-amber-600"
+            )}
+            title={saved ? t("jobs.saved") : t("jobs.saveJob")}
+          >
+            {saved ? '⭐ ' + t("jobs.saved") : '☆ ' + t("jobs.saveJob")}
+          </button>
+ 
             <button
               onClick={() => {
-                setShowDetails(true);
+                const eventType = isFuture ? "job_pre_registered" : "job_apply_clicked";
                 trackEvent({
-                  eventType: "job_details_viewed",
-                  eventCategory: "Job",
-                  eventAction: "view_details",
-                  metadata: { jobId: job.id, company: job.company, category: job.category },
-                });
-              }}
-              className="p-2.5 rounded-xl bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
-              title={t("jobs.viewDetails")}
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-
-            <button 
-              onClick={() => {
-                fetch('/api/favorites', { method: 'POST', body: JSON.stringify({ jobId: job.id }) });
-                setSaved(true);
-                trackEvent({
-                  eventType: "job_saved",
-                  eventCategory: "Job",
-                  eventAction: "save",
-                  metadata: { jobId: job.id, company: job.company },
-                });
-              }}
-              className={cn(
-                "p-2.5 rounded-xl transition-all flex items-center gap-2 text-xs font-bold",
-                saved ? "bg-amber-100 text-amber-600" : "bg-secondary text-muted-foreground hover:bg-amber-50 hover:text-amber-600"
-              )}
-              title={saved ? t("jobs.saved") : t("jobs.saveJob")}
-            >
-              {saved ? '⭐ ' + t("jobs.saved") : '☆ ' + t("jobs.saveJob")}
-            </button>
-          </div>
-
-          <div className="flex-1 grid grid-cols-2 gap-2">
-            <Link
-              href={`/jobs/${job.id}/apply`}
-              className={cn(
-                "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all text-center",
-                isClosed
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-primary text-white hover:bg-primary/90"
-              )}
-              onClick={(e) => {
-                if (isClosed) {
-                  e.preventDefault();
-                  return;
-                }
-                trackEvent({
-                  eventType: "job_apply_here_clicked",
+                  eventType,
                   eventCategory: "Application",
-                  eventAction: "apply_here",
-                  metadata: { jobId: job.id, company: job.company, category: job.category, status: isFuture ? "future" : "open" },
+                  eventAction: "apply_click",
+                  metadata: { jobId: job.id, company: job.company, category: job.category, status: isClosed ? "closed" : isFuture ? "future" : "open" },
                 });
-              }}
-            >
-              Apply Here
-            </Link>
-
-            <a
-              href={applyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all text-center",
-                isClosed
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-secondary text-foreground hover:bg-secondary/90"
-              )}
-              onClick={() => {
-                if (!isClosed) {
-                  trackEvent({
-                    eventType: "job_apply_now_clicked",
-                    eventCategory: "Application",
-                    eventAction: "apply_now",
-                    metadata: { jobId: job.id, company: job.company, category: job.category, url: applyUrl },
-                  });
+                if (isFuture) {
+                  setShowPreRegister(true);
+                } else {
+                  // Open link in a new tab safely
+                  try {
+                    const a = document.createElement('a');
+                    a.href = applyUrl;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.click();
+                  } catch (e) {
+                    const newWin = window.open(applyUrl, '_blank');
+                    if (newWin) newWin.opener = null;
+                  }
                 }
               }}
+              className={cn(
+                "flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all group/btn",
+                isClosed
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : "bg-primary text-white hover:bg-primary/90 hover:scale-[1.01]"
+              )}
+              disabled={isClosed}
             >
-              {isClosed ? "Closed" : "Apply Now"}
-            </a>
-          </div>
+              {isClosed ? "Closed" : isFuture ? "Pre-Register" : t("jobs.apply")}
+              {!isClosed && <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />}
+            </button>
         </div>
       </div>
 
