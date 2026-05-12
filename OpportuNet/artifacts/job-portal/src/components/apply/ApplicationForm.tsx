@@ -19,15 +19,19 @@ import { Loader2, Upload, FileText, CheckCircle } from "lucide-react";
 const formSchema = z.object({
   applicantName: z.string().min(2, "Name must be at least 2 characters"),
   applicantEmail: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  age: z.number().int().positive("Age must be a positive number").min(16, "Must be at least 16 years old").max(100, "Age must be 100 or younger"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   currentLocation: z.string().min(2, "Location is required"),
   yearsExperience: z.string().min(1, "Years of experience is required"),
+  qualification: z.string().min(2, "Qualification is required"),
+  education: z.string().min(2, "Education details are required"),
   currentCompany: z.string().optional(),
   coverLetter: z.string().optional(),
   portfolioUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   linkedinUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  education: z.string().min(2, "Education details are required"),
   skills: z.string().min(2, "Skills are required"),
+  photo: z.any().refine((files) => files?.length > 0, "Profile photo is required"),
   resume: z.any().refine((files) => files?.length > 0, "Resume is required"),
   declaration: z.boolean().refine((val) => val === true, "You must accept the declaration"),
   digitalSignature: z.boolean().optional(),
@@ -53,15 +57,20 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ jobId, companyName, i
     defaultValues: {
       applicantName: "",
       applicantEmail: "",
+      password: "",
+      age: undefined,
       phone: "",
       currentLocation: "",
       yearsExperience: "",
+      qualification: "",
+      education: "",
       currentCompany: "",
       coverLetter: "",
       portfolioUrl: "",
       linkedinUrl: "",
-      education: "",
       skills: "",
+      photo: undefined,
+      resume: undefined,
       declaration: false,
       digitalSignature: false,
     },
@@ -77,15 +86,19 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ jobId, companyName, i
     formData.append("jobId", jobId.toString());
     formData.append("applicantName", values.applicantName);
     formData.append("applicantEmail", values.applicantEmail);
+    formData.append("password", values.password);
+    formData.append("age", values.age.toString());
     formData.append("phone", values.phone);
     formData.append("currentLocation", values.currentLocation);
     formData.append("yearsExperience", values.yearsExperience);
+    formData.append("qualification", values.qualification);
+    formData.append("education", values.education);
     formData.append("currentCompany", values.currentCompany || "");
     formData.append("coverLetter", values.coverLetter || "");
     formData.append("portfolioUrl", values.portfolioUrl || "");
     formData.append("linkedinUrl", values.linkedinUrl || "");
-    formData.append("education", values.education);
     formData.append("skills", values.skills);
+    formData.append("photo", values.photo[0]);
     formData.append("resume", values.resume[0]);
 
     await onSubmit(formData);
@@ -123,6 +136,34 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ jobId, companyName, i
                   <FormLabel>Email Address *</FormLabel>
                   <FormControl>
                     <Input placeholder="john@example.com" type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Create a password" type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="age"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Age *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. 25" type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -173,12 +214,12 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ jobId, companyName, i
 
             <FormField
               control={form.control}
-              name="currentCompany"
+              name="qualification"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Current Company</FormLabel>
+                  <FormLabel>Highest Qualification *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Company Name" {...field} />
+                    <Input placeholder="B.Tech, MBA, etc." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -193,7 +234,7 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ jobId, companyName, i
               <FormItem>
                 <FormLabel>Education Details *</FormLabel>
                 <FormControl>
-                  <Input placeholder="Highest qualification, University" {...field} />
+                  <Input placeholder="Institution, major, year" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -262,10 +303,51 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ jobId, companyName, i
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="resume"
-            render={({ field: { value, onChange, ...fieldProps } }) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="photo"
+              render={({ field: { value, onChange, ...fieldProps } }) => (
+                <FormItem>
+                  <FormLabel>Upload Profile Photo *</FormLabel>
+                  <FormControl>
+                    <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-gray-300 transition-colors bg-gray-50/30">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id="photo-upload"
+                        onChange={(e) => onChange(e.target.files)}
+                        {...fieldProps}
+                      />
+                      <label htmlFor="photo-upload" className="cursor-pointer flex flex-col items-center">
+                        <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-4">
+                          {value && value.length > 0 ? (
+                            <CheckCircle className="h-6 w-6 text-green-600" />
+                          ) : (
+                            <Upload className="h-6 w-6 text-gray-400" />
+                          )}
+                        </div>
+                        {value && value.length > 0 ? (
+                          <div className="text-sm font-medium text-gray-900">{value[0].name}</div>
+                        ) : (
+                          <>
+                            <div className="text-sm font-medium text-gray-900">Click to upload or drag and drop</div>
+                            <div className="text-xs text-gray-500 mt-1">JPEG, PNG, WEBP (Max 5MB)</div>
+                          </>
+                        )}
+                      </label>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="resume"
+              render={({ field: { value, onChange, ...fieldProps } }) => (
               <FormItem>
                 <FormLabel>Upload Resume (PDF/DOC) *</FormLabel>
                 <FormControl>
@@ -301,6 +383,7 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({ jobId, companyName, i
               </FormItem>
             )}
           />
+          </div>
 
           <FormField
             control={form.control}
