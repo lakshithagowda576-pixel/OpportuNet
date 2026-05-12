@@ -1,22 +1,21 @@
 {
-  "name": "workspace",
-  "version": "0.0.0",
-  "license": "MIT",
+  "name": "opportunet-deployment",
+  "version": "1.0.0",
+  "description": "OpportuNet deployment package",
+  "main": "api/[[...all]].ts",
   "scripts": {
-    "preinstall": "node -e \"if(!process.env.npm_config_user_agent?.includes('pnpm/')) { console.error('Use pnpm instead'); process.exit(1); }\"",
-    "build": "pnpm run typecheck && pnpm -r --if-present run build",
-    "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+    "build": "echo 'Building OpportuNet...' && cd artifacts/job-portal && npm install && npm run build",
+    "dev": "echo 'Development mode'",
+    "start": "echo 'Starting OpportuNet'"
   },
-  "private": true,
   "dependencies": {
     "serverless-http": "^2.8.0"
   },
   "devDependencies": {
-    "@esbuild/win32-x64": "^0.28.0",
-    "@rollup/rollup-win32-x64-msvc": "^4.60.2",
-    "esbuild": "0.28.0",
-    "prettier": "^3.8.1",
-    "typescript": "~5.9.2"
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
