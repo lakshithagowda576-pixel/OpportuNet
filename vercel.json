@@ -1,24 +1,5 @@
 {
   "version": 3,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build"
-    },
-    {
-      "src": "OpportuNet/api/[[...all]].ts",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/OpportuNet/api/[[...all]].ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
-  "outputDirectory": "OpportuNet/artifacts/job-portal/dist/public"
+  "buildCommand": "pnpm run build:vercel",
+  "outputDirectory": "OpportuNet/artifacts/job-portal/dist"
 }
