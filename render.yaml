@@ -2,21 +2,20 @@ services:
   - type: web
     name: opportu-net-api
     runtime: node
-    buildCommand: pnpm install --frozen-lockfile && pnpm run build
-    startCommand: pnpm run start:api
+    buildCommand: pnpm install --frozen-lockfile && pnpm -C artifacts/api-server run build
+    startCommand: node ./artifacts/api-server/dist/index.mjs
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
-      # Add your environment variables here
+        value: 3008
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_URL
         sync: false
       - key: SUPABASE_URL
         sync: false
-      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+      - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
@@ -40,17 +39,21 @@ services:
         sync: false
       - key: API_KEY
         sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: OAUTH_CALLBACK_BASE_URL
+        sync: false
 
-  - type: web
+  - type: static site
     name: opportu-net-frontend
-    runtime: static
-    buildCommand: cd OpportuNet/artifacts/job-portal && npm install && npm run build
-    staticPublishPath: ./dist/public
+    buildCommand: pnpm install --frozen-lockfile && pnpm -C OpportuNet/artifacts/job-portal run build
+    staticPublishPath: OpportuNet/artifacts/job-portal/dist
     envVars:
       - key: NODE_ENV
         value: production
-      # Add frontend environment variables here
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_API_URL
         sync: false
