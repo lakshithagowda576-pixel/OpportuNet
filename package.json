@@ -1,6 +1,9 @@
 {
   "name": "opportu-net-workspace",
   "private": true,
+  "engines": {
+    "node": "20.11.0"
+  },
   "scripts": {
     "dev": "pnpm -r --filter \"@workspace/api-server\" --filter \"@workspace/job-portal\" --parallel dev",
     "dev:all": "pnpm -r --parallel dev",
