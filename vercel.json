@@ -1,5 +1,5 @@
 {
   "version": 3,
   "buildCommand": "pnpm run build:vercel",
-  "outputDirectory": "OpportuNet/artifacts/job-portal/dist"
+  "outputDirectory": "artifacts/job-portal/dist/public"
 }

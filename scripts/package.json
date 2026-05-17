@@ -10,6 +10,7 @@
     "bulk_seed_jobs": "tsx ./src/bulk_seed_jobs.ts",
     "seed_pre_register_jobs": "tsx ./src/seed_pre_register_jobs.ts",
     "seed_active_apps": "tsx ./src/seed_active_applications.ts",
+    "seed_branding_links": "tsx ./src/seed_branding_links.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

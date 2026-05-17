@@ -368,15 +368,15 @@ export declare const createStudyMaterialSchema: z.ZodObject<{
     title: string;
     description: string;
     examId: number;
-    subject: string;
     type: "PDF" | "Video" | "Notes" | "Practice_Test";
+    subject: string;
     url: string;
 }, {
     title: string;
     description: string;
     examId: number;
-    subject: string;
     type: "PDF" | "Video" | "Notes" | "Practice_Test";
+    subject: string;
     url: string;
 }>;
 export declare const updateStudyMaterialSchema: z.ZodObject<Omit<{
@@ -389,14 +389,14 @@ export declare const updateStudyMaterialSchema: z.ZodObject<Omit<{
 }, "examId">, "strip", z.ZodTypeAny, {
     title?: string | undefined;
     description?: string | undefined;
-    subject?: string | undefined;
     type?: "PDF" | "Video" | "Notes" | "Practice_Test" | undefined;
+    subject?: string | undefined;
     url?: string | undefined;
 }, {
     title?: string | undefined;
     description?: string | undefined;
-    subject?: string | undefined;
     type?: "PDF" | "Video" | "Notes" | "Practice_Test" | undefined;
+    subject?: string | undefined;
     url?: string | undefined;
 }>;
 export type CreateStudyMaterialInput = z.infer<typeof createStudyMaterialSchema>;

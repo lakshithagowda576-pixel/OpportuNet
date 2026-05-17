@@ -7,6 +7,7 @@ import {
   UpdateApplicationStatusBody,
   UpdateApplicationStatusParams,
   GetJobApplicantCountParams,
+  internalApplicationSchema,
 } from "@workspace/api-zod";
 import { buildDefaultHrEmail, normalizeJobRecord } from "../lib/normalize-job";
 import { requireAuth } from "../middleware/requireAuth";
@@ -124,6 +125,152 @@ router.post("/applications/pre-register", async (req, res) => {
     console.error("Pre-registration error details:", err);
     res.status(500).json({ error: err.message || "Pre-registration failed" });
   }
+});
+
+router.post("/applications/internal", async (req, res) => {
+  try {
+    const body = internalApplicationSchema.parse(req.body);
+    const { jobId, fullName, email, password, age, qualification, yearsOfExperience, currentCompany, skills, resumeUrl, coverLetter, acceptedTerms } = body;
+
+    // 1. Get or create user
+    let user;
+    const [existingUser] = await db.select().from(usersTable).where(eq(usersTable.email, email));
+    if (!existingUser) {
+      const passwordHash = await bcrypt.hash(password, 10);
+      const [newUser] = await db.insert(usersTable).values({
+        name: fullName,
+        email,
+        passwordHash,
+        provider: "email",
+        role: "user"
+      }).returning();
+      user = newUser;
+    } else {
+      user = existingUser;
+      // If user exists and password is provided, verify it (unless they are already logged in as this user)
+      if (req.session?.userId !== user.id) {
+        const match = await bcrypt.compare(password, user.passwordHash || "");
+        if (!match) {
+          res.status(401).json({ error: "Incorrect password for existing account." });
+          return;
+        }
+      }
+    }
+
+    // Auto-login
+    if (req.session) {
+      req.session.userId = user.id;
+      req.session.userRole = user.role;
+    }
+
+    // 2. Check if already applied
+    const [existingApp] = await db
+      .select()
+      .from(applicationsTable)
+      .where(and(eq(applicationsTable.jobId, jobId), eq(applicationsTable.applicantEmail, email)));
+
+    if (existingApp) {
+      res.status(400).json({ error: "You have already applied for this job." });
+      return;
+    }
+
+    // 3. Create the application
+    const [app] = await db.insert(applicationsTable).values({
+      jobId,
+      userId: user.id,
+      applicantName: fullName,
+      applicantEmail: email,
+      age,
+      qualification,
+      yearsOfExperience: yearsOfExperience?.toString(),
+      currentCompany,
+      skills,
+      resumeUrl,
+      coverLetter,
+      acceptedTerms: !!acceptedTerms,
+      status: "Pending" as any
+    }).returning();
+
+    // Send confirmation email
+    sendApplicationConfirmationEmail(app.id);
+
+    res.status(201).json({ success: true, applicationId: app.id });
+  } catch (err: any) {
+    console.error("Internal application submission error:", err);
+    res.status(500).json({ error: err.message || "Failed to submit application" });
+  }
+});
+
+router.post("/applications/track", async (req, res) => {
+  const { jobId, applicantName, applicantEmail } = req.body;
+
+  if (!jobId) {
+    res.status(400).json({ error: "Job ID is required" });
+    return;
+  }
+
+  try {
+    const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
+    if (!job) {
+      res.status(404).json({ error: "Job not found" });
+      return;
+    }
+
+    const user = await getSessionUser(req);
+    const email = user?.email || applicantEmail || "guest@opportunet.com";
+    const name = user?.name || applicantName || "Guest User";
+
+    // Check if they already applied or tracked
+    const [existing] = await db
+      .select()
+      .from(applicationsTable)
+      .where(and(eq(applicationsTable.jobId, jobId), eq(applicationsTable.applicantEmail, email)));
+
+    let app;
+    if (existing) {
+      // Just update status to Redirected if not already applied
+      if (existing.status !== "Redirected") {
+        [app] = await db.update(applicationsTable).set({ status: "Redirected" as any }).where(eq(applicationsTable.id, existing.id)).returning();
+      } else {
+        app = existing;
+      }
+    } else {
+      [app] = await db
+        .insert(applicationsTable)
+        .values({
+          jobId,
+          userId: user?.id || null,
+          applicantName: name,
+          applicantEmail: email,
+          status: "Redirected" as any,
+          acceptedTerms: true,
+        })
+        .returning();
+    }
+
+    const normalizedJob = normalizeJobRecord(job);
+    sendApplicationConfirmationEmail(app.id);
+
+    res.json({
+      trackingId: app.id,
+      officialUrl: normalizedJob.official_url,
+      official_url: normalizedJob.official_url,
+      applicationLink: normalizedJob.applicationLink,
+      hrEmail: normalizedJob.hrEmail || buildDefaultHrEmail(job.company),
+      success: true
+    });
+  } catch (err: any) {
+    console.error("Track application error:", err);
+    res.status(500).json({ error: err.message || "Failed to track application" });
+  }
+});
+
+router.post("/upload-resume", upload.single("resume"), (req, res) => {
+  if (!req.file) {
+    res.status(400).json({ error: "No resume file provided" });
+    return;
+  }
+  res.json({ url: `/uploads/${req.file.filename}` });
 });
 
 router.use("/applications", requireAuth);
@@ -350,49 +497,7 @@ router.get("/jobs/:id/applicant-count", async (req, res) => {
   });
 });
 
-router.post("/applications/track", async (req, res) => {
-  const { jobId, applicantName, applicantEmail } = req.body;
-
-  if (!jobId || !applicantName || !applicantEmail) {
-    res.status(400).json({ error: "Missing required fields" });
-    return;
-  }
-
-  const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
-  if (!job) {
-    res.status(404).json({ error: "Job not found" });
-    return;
-  }
-
-  const user = await getSessionUser(req);
-
-  // Create a tracking record as an application with Redirected status
-  const [app] = await db
-    .insert(applicationsTable)
-    .values({
-      jobId,
-      userId: user?.id,
-      applicantName: user?.name || applicantName,
-      applicantEmail: user?.email || applicantEmail,
-      status: "Redirected" as any,
-      acceptedTerms: true,
-    })
-    .returning();
-
-  const normalizedJob = normalizeJobRecord(job);
-
-  // If user is tracked, their applications will show up in "My Applications" due to email matching.
-  sendApplicationConfirmationEmail(app.id);
-
-  res.json({
-    trackingId: app.id,
-    officialUrl: normalizedJob.official_url,
-    official_url: normalizedJob.official_url,
-    applicationLink: normalizedJob.applicationLink,
-    hrEmail: normalizedJob.hrEmail || buildDefaultHrEmail(job.company),
-    success: true
-  });
-});
+// Track route removed and moved to the public section of this file
 
 router.get("/applications/summary", async (req, res) => {
   const user = await getSessionUser(req);

@@ -13,3 +13,5 @@ export * from "./resumes";
 export * from "./job-sources";
 export * from "./analytics";
 export * from "./payments";
+export * from "./company-branding";
+export * from "./external-links";

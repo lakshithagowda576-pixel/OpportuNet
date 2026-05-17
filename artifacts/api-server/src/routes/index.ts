@@ -9,6 +9,7 @@ import collegesRouter from "./colleges";
 import companiesRouter from "./companies";
 import paymentsRouter from "./payments";
 import aiRouter from "./ai";
+import analyticsRouter from "./analytics";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use("/colleges", collegesRouter);
 router.use("/companies", companiesRouter);
 router.use("/payments", paymentsRouter);
 router.use("/ai", aiRouter);
+router.use(analyticsRouter);
 
 export default router;

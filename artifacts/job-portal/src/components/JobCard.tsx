@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { PreRegisterForm } from "./PreRegisterForm";
 import { trackEvent } from "@/lib/analytics";
 import { useTranslation } from "react-i18next";
+import { ApplicationModal } from "./ApplicationModal";
+import { useTrackExternalApplication } from "@/hooks/useInternalApplication";
 
 interface JobCardProps {
   job: Job;
@@ -19,7 +21,9 @@ import { motion } from "framer-motion";
 export function JobCard({ job, applicantCount }: JobCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [showPreRegister, setShowPreRegister] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
   const [saved, setSaved] = useState(false);
+  const trackExternalRedirect = useTrackExternalApplication();
   const externalApplyUrl = job.official_url || job.applicationLink;
   const hasExternalApply = !!externalApplyUrl && externalApplyUrl.startsWith("http");
   const { t } = useTranslation();
@@ -142,43 +146,47 @@ export function JobCard({ job, applicantCount }: JobCardProps) {
           </div>
         </div>
 
-        <div className="mt-auto pt-4 border-t border-border/50 flex items-center gap-2">
-          <button
-            onClick={() => {
-              setShowDetails(true);
-              trackEvent({
-                eventType: "job_details_viewed",
-                eventCategory: "Job",
-                eventAction: "view_details",
-                metadata: { jobId: job.id, company: job.company, category: job.category },
-              });
-            }}
-            className="p-2.5 rounded-xl bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
-            title={t("jobs.viewDetails")}
-          >
-            <Eye className="w-4 h-4" />
-          </button>
+        <div className="mt-auto pt-4 border-t border-border/50 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setShowDetails(true);
+                trackEvent({
+                  eventType: "job_details_viewed",
+                  eventCategory: "Job",
+                  eventAction: "view_details",
+                  metadata: { jobId: job.id, company: job.company, category: job.category },
+                });
+              }}
+              className="p-2.5 rounded-xl bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all flex-1 flex justify-center items-center gap-2 text-xs font-bold"
+              title={t("jobs.viewDetails")}
+            >
+              <Eye className="w-4 h-4" /> <span>Details</span>
+            </button>
 
-          <button 
-            onClick={() => {
-              fetch('/api/favorites', { method: 'POST', body: JSON.stringify({ jobId: job.id }) });
-              setSaved(true);
-              trackEvent({
-                eventType: "job_saved",
-                eventCategory: "Job",
-                eventAction: "save",
-                metadata: { jobId: job.id, company: job.company },
-              });
-            }}
-            className={cn(
-              "p-2.5 rounded-xl transition-all flex items-center gap-2 text-xs font-bold",
-              saved ? "bg-amber-100 text-amber-600" : "bg-secondary text-muted-foreground hover:bg-amber-50 hover:text-amber-600"
-            )}
-            title={saved ? t("jobs.saved") : t("jobs.saveJob")}
-          >
-            {saved ? '⭐ ' + t("jobs.saved") : '☆ ' + t("jobs.saveJob")}
-          </button>
- 
+            <button 
+              onClick={() => {
+                fetch('/api/favorites', { method: 'POST', body: JSON.stringify({ jobId: job.id }) });
+                setSaved(true);
+                trackEvent({
+                  eventType: "job_saved",
+                  eventCategory: "Job",
+                  eventAction: "save",
+                  metadata: { jobId: job.id, company: job.company },
+                });
+              }}
+              className={cn(
+                "p-2.5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-bold flex-1",
+                saved ? "bg-amber-100 text-amber-600" : "bg-secondary text-muted-foreground hover:bg-amber-50 hover:text-amber-600"
+              )}
+              title={saved ? t("jobs.saved") : t("jobs.saveJob")}
+            >
+              {saved ? '⭐ ' + t("jobs.saved") : '☆ ' + t("jobs.saveJob")}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Option 1: Apply Here (Internal) */}
             <button
               onClick={() => {
                 const eventType = isFuture ? "job_pre_registered" : "job_apply_clicked";
@@ -191,30 +199,42 @@ export function JobCard({ job, applicantCount }: JobCardProps) {
                 if (isFuture) {
                   setShowPreRegister(true);
                 } else {
-                  // Open link in a new tab safely
-                  try {
-                    const a = document.createElement('a');
-                    a.href = applyUrl;
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
-                    a.click();
-                  } catch (e) {
-                    const newWin = window.open(applyUrl, '_blank');
-                    if (newWin) newWin.opener = null;
-                  }
+                  setShowApplyModal(true);
                 }
               }}
               className={cn(
-                "flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all group/btn",
-                isClosed
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-primary text-white hover:bg-primary/90 hover:scale-[1.01]"
+                "flex-1 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-black transition-all bg-emerald-600 text-white hover:bg-emerald-700 hover:scale-[1.01]"
               )}
               disabled={isClosed}
             >
-              {isClosed ? "Closed" : isFuture ? "Pre-Register" : t("jobs.apply")}
-              {!isClosed && <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />}
+              <span>Apply Here</span>
             </button>
+
+            {/* Option 2: Apply Now (External Redirect + Click Tracking) */}
+            <button
+              onClick={() => {
+                if (isClosed) return;
+                trackExternalRedirect.mutate({ jobId: job.id });
+                try {
+                  const a = document.createElement('a');
+                  a.href = applyUrl;
+                  a.target = '_blank';
+                  a.rel = 'noopener noreferrer';
+                  a.click();
+                } catch (e) {
+                  const newWin = window.open(applyUrl, '_blank');
+                  if (newWin) newWin.opener = null;
+                }
+              }}
+              className={cn(
+                "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-black transition-all bg-primary text-white hover:bg-primary/90 hover:scale-[1.01]"
+              )}
+              disabled={isClosed}
+            >
+              <span>Apply Now</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -401,19 +421,52 @@ export function JobCard({ job, applicantCount }: JobCardProps) {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-border">
+            <div className="pt-4 border-t border-border flex gap-3">
               <button
-                onClick={() => isFuture ? (setShowDetails(false), setShowPreRegister(true)) : (hasExternalApply ? (function(){ try { const a = document.createElement('a'); a.href = externalApplyUrl; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.click(); } catch(e){ const w = window.open(externalApplyUrl,'_blank'); if(w) w.opener = null;} })() : null)}
+                onClick={() => {
+                  setShowDetails(false);
+                  if (isFuture) {
+                    setShowPreRegister(true);
+                  } else {
+                    setShowApplyModal(true);
+                  }
+                }}
                 className={cn(
-                  "w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base font-bold transition-all shadow-lg",
+                  "flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base font-bold transition-all shadow-lg",
+                  isClosed
+                    ? "bg-muted text-muted-foreground cursor-not-allowed"
+                    : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-500/20 hover:-translate-y-0.5"
+                )}
+                disabled={isClosed}
+              >
+                <span>Apply Here (Internal)</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  if (isClosed) return;
+                  trackExternalRedirect.mutate({ jobId: job.id });
+                  try {
+                    const a = document.createElement('a');
+                    a.href = applyUrl;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.click();
+                  } catch (e) {
+                    const newWin = window.open(applyUrl, '_blank');
+                    if (newWin) newWin.opener = null;
+                  }
+                }}
+                className={cn(
+                  "flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base font-bold transition-all shadow-lg",
                   isClosed
                     ? "bg-muted text-muted-foreground cursor-not-allowed"
                     : "bg-primary text-white hover:bg-primary/90 shadow-primary/30 hover:-translate-y-0.5"
                 )}
                 disabled={isClosed}
               >
-                {isClosed ? "Application Closed" : isFuture ? "Pre-Register Now" : t("jobs.apply")}
-                <ChevronRight className="w-5 h-5" />
+                <span>Apply Now (External)</span>
+                <ExternalLink className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -431,6 +484,12 @@ export function JobCard({ job, applicantCount }: JobCardProps) {
           />
         </DialogContent>
       </Dialog>
+      {/* Application Form Modal */}
+      <ApplicationModal
+        job={job as any}
+        isOpen={showApplyModal}
+        onClose={() => setShowApplyModal(false)}
+      />
     </motion.div>
   );
 }

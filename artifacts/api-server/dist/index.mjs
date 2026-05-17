@@ -20613,27 +20613,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router12;
+    module.exports = Router13;
     module.exports.Route = Route;
-    function Router12(options) {
-      if (!(this instanceof Router12)) {
-        return new Router12(options);
+    function Router13(options) {
+      if (!(this instanceof Router13)) {
+        return new Router13(options);
       }
       const opts = options || {};
-      function router12(req, res, next) {
-        router12.handle(req, res, next);
+      function router13(req, res, next) {
+        router13.handle(req, res, next);
       }
-      Object.setPrototypeOf(router12, this);
-      router12.caseSensitive = opts.caseSensitive;
-      router12.mergeParams = opts.mergeParams;
-      router12.params = {};
-      router12.strict = opts.strict;
-      router12.stack = [];
-      return router12;
+      Object.setPrototypeOf(router13, this);
+      router13.caseSensitive = opts.caseSensitive;
+      router13.mergeParams = opts.mergeParams;
+      router13.params = {};
+      router13.strict = opts.strict;
+      router13.stack = [];
+      return router13;
     }
-    Router12.prototype = function() {
+    Router13.prototype = function() {
     };
-    Router12.prototype.param = function param(name, fn) {
+    Router13.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20653,7 +20653,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router12.prototype.handle = function handle(req, res, callback) {
+    Router13.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20780,7 +20780,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router12.prototype.use = function use(handler) {
+    Router13.prototype.use = function use(handler) {
       let offset = 0;
       let path2 = "/";
       if (typeof handler !== "function") {
@@ -20813,7 +20813,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router12.prototype.route = function route(path2) {
+    Router13.prototype.route = function route(path2) {
       const route2 = new Route(path2);
       const layer = new Layer(path2, {
         sensitive: this.caseSensitive,
@@ -20828,7 +20828,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router12.prototype[method] = function(path2) {
+      Router13.prototype[method] = function(path2) {
         const route = this.route(path2);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21011,13 +21011,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve = __require("node:path").resolve;
     var once = require_once();
-    var Router12 = require_router();
+    var Router13 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router12 = null;
+      var router13 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21026,13 +21026,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router12 === null) {
-            router12 = new Router12({
+          if (router13 === null) {
+            router13 = new Router13({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router12;
+          return router13;
         }
       });
     };
@@ -21103,15 +21103,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router12 = this.router;
+      var router13 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router12.use(path2, fn2);
+          return router13.use(path2, fn2);
         }
         debug(".use app under %s", path2);
         fn2.mountpath = path2;
         fn2.parent = this;
-        router12.use(path2, function mounted_app(req, res, next) {
+        router13.use(path2, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23684,7 +23684,7 @@ var require_express = __commonJS({
     var EventEmitter2 = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router12 = require_router();
+    var Router13 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23706,8 +23706,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router12.Route;
-    exports.Router = Router12;
+    exports.Route = Router13.Route;
+    exports.Router = Router13;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -53734,14 +53734,14 @@ var require_node_cron = __commonJS({
 });
 
 // src/app.ts
-var import_express12 = __toESM(require_express2(), 1);
+var import_express13 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 var import_express_session = __toESM(require_express_session(), 1);
 var import_connect_pg_simple = __toESM(require_connect_pg_simple(), 1);
 
 // src/routes/index.ts
-var import_express11 = __toESM(require_express2(), 1);
+var import_express12 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -58094,6 +58094,26 @@ var listQuerySchema = external_exports.object({
   category: external_exports.string().optional(),
   limit: external_exports.coerce.number().int().positive().optional().default(100),
   offset: external_exports.coerce.number().int().min(0).optional().default(0)
+});
+
+// ../../lib/api-zod/src/schemas/internal-application.ts
+var internalApplicationSchema = external_exports.object({
+  jobId: external_exports.coerce.number().int().positive("Valid Job ID is required"),
+  fullName: external_exports.string().min(2, "Full name must be at least 2 characters").max(255),
+  email: external_exports.string().email("Please enter a valid email address"),
+  password: external_exports.string().min(6, "Password must be at least 6 characters"),
+  age: external_exports.coerce.number().int().min(18, "Age must be at least 18").max(65, "Age cannot exceed 65"),
+  qualification: external_exports.enum(["10th", "12th", "Diploma", "Bachelor's", "Master's", "PhD"], {
+    errorMap: () => ({ message: "Please select a valid qualification" })
+  }),
+  yearsOfExperience: external_exports.coerce.number().min(0, "Experience cannot be negative").max(50, "Experience cannot exceed 50"),
+  currentCompany: external_exports.string().optional(),
+  skills: external_exports.string().min(1, "Please list at least one skill"),
+  resumeUrl: external_exports.string().min(1, "Resume is required"),
+  coverLetter: external_exports.string().optional(),
+  acceptedTerms: external_exports.boolean().refine((val) => val === true, {
+    message: "You must accept the terms and conditions"
+  })
 });
 
 // src/routes/health.ts
@@ -65240,6 +65260,7 @@ __export(schema_exports, {
   collegeFeesTable: () => collegeFeesTable,
   collegesTable: () => collegesTable,
   companiesTable: () => companiesTable,
+  companyBrandingTable: () => companyBrandingTable,
   companyReviewsTable: () => companyReviewsTable,
   createAnalyticsEventSchema: () => createAnalyticsEventSchema,
   createJobSourceSchema: () => createJobSourceSchema,
@@ -65247,16 +65268,19 @@ __export(schema_exports, {
   emailStatusEnum: () => emailStatusEnum,
   examResultsTable: () => examResultsTable,
   examsTable: () => examsTable,
+  externalLinksTable: () => externalLinksTable,
   hrEmailsTable: () => hrEmailsTable,
   insertAlertEmailSchema: () => insertAlertEmailSchema,
   insertApplicationSchema: () => insertApplicationSchema,
   insertCollegeCutoffSchema: () => insertCollegeCutoffSchema,
   insertCollegeFeeSchema: () => insertCollegeFeeSchema,
   insertCollegeSchema: () => insertCollegeSchema,
+  insertCompanyBrandingSchema: () => insertCompanyBrandingSchema,
   insertCompanyReviewSchema: () => insertCompanyReviewSchema,
   insertCompanySchema: () => insertCompanySchema,
   insertExamResultSchema: () => insertExamResultSchema,
   insertExamSchema: () => insertExamSchema,
+  insertExternalLinkSchema: () => insertExternalLinkSchema,
   insertJobAlertSchema: () => insertJobAlertSchema,
   insertJobSchema: () => insertJobSchema,
   insertMessageSchema: () => insertMessageSchema,
@@ -77148,6 +77172,30 @@ var paymentsTable = pgTable("payments", {
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+// ../../lib/db/src/schema/company-branding.ts
+var companyBrandingTable = pgTable("company_branding", {
+  id: serial("id").primaryKey(),
+  companyName: varchar("company_name", { length: 255 }).notNull().unique(),
+  primaryColor: varchar("primary_color", { length: 7 }),
+  // Hex code like #4285F4
+  secondaryColor: varchar("secondary_color", { length: 7 }),
+  logoUrl: text("logo_url"),
+  formBackgroundColor: varchar("form_background_color", { length: 7 }),
+  buttonColor: varchar("button_color", { length: 7 }),
+  buttonTextColor: varchar("button_text_color", { length: 7 })
+});
+var insertCompanyBrandingSchema = createInsertSchema(companyBrandingTable).omit({ id: true });
+
+// ../../lib/db/src/schema/external-links.ts
+var externalLinksTable = pgTable("external_links", {
+  id: serial("id").primaryKey(),
+  jobId: integer("job_id").references(() => jobsTable.id),
+  officialUrl: text("official_url").notNull(),
+  lastVerified: timestamp("last_verified"),
+  isActive: boolean("is_active").default(true).notNull()
+});
+var insertExternalLinkSchema = createInsertSchema(externalLinksTable).omit({ id: true });
+
 // ../../lib/db/src/index.ts
 var { Pool: Pool3 } = esm_default;
 if (!process.env.DATABASE_URL) {
@@ -77203,18 +77251,43 @@ router2.get("/jobs", async (req, res) => {
       )
     );
   }
-  const jobs = conditions.length === 0 ? await db.select().from(jobsTable) : conditions.length === 1 ? await db.select().from(jobsTable).where(conditions[0]) : await db.select().from(jobsTable).where(and(...conditions));
-  const formatted = jobs.map((j) => normalizeJobRecord(j));
+  const queryBuilder = db.select({
+    job: jobsTable,
+    branding: companyBrandingTable,
+    externalLink: externalLinksTable
+  }).from(jobsTable).leftJoin(companyBrandingTable, eq(jobsTable.company, companyBrandingTable.companyName)).leftJoin(externalLinksTable, eq(jobsTable.id, externalLinksTable.jobId));
+  const results = conditions.length === 0 ? await queryBuilder : conditions.length === 1 ? await queryBuilder.where(conditions[0]) : await queryBuilder.where(and(...conditions));
+  const formatted = results.map(({ job, branding, externalLink }) => {
+    const norm = normalizeJobRecord(job);
+    return {
+      ...norm,
+      branding: branding || null,
+      externalLink: externalLink || null,
+      applicationLink: externalLink?.isActive && externalLink.officialUrl || norm.applicationLink,
+      official_url: externalLink?.isActive && externalLink.officialUrl || norm.official_url
+    };
+  });
   res.json(formatted);
 });
 router2.get("/jobs/:id", async (req, res) => {
   const params = GetJobParams.parse({ id: parseInt(req.params.id) });
-  const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, params.id));
-  if (!job) {
+  const [result] = await db.select({
+    job: jobsTable,
+    branding: companyBrandingTable,
+    externalLink: externalLinksTable
+  }).from(jobsTable).leftJoin(companyBrandingTable, eq(jobsTable.company, companyBrandingTable.companyName)).leftJoin(externalLinksTable, eq(jobsTable.id, externalLinksTable.jobId)).where(eq(jobsTable.id, params.id));
+  if (!result) {
     res.status(404).json({ error: "Job not found" });
     return;
   }
-  res.json(normalizeJobRecord(job));
+  const norm = normalizeJobRecord(result.job);
+  res.json({
+    ...norm,
+    branding: result.branding || null,
+    externalLink: result.externalLink || null,
+    applicationLink: result.externalLink?.isActive && result.externalLink.officialUrl || norm.applicationLink,
+    official_url: result.externalLink?.isActive && result.externalLink.officialUrl || norm.official_url
+  });
 });
 router2.post("/favorites", (req, res) => {
   res.json({ success: true });
@@ -77995,6 +78068,118 @@ router3.post("/applications/pre-register", async (req, res) => {
     res.status(500).json({ error: err.message || "Pre-registration failed" });
   }
 });
+router3.post("/applications/internal", async (req, res) => {
+  try {
+    const body = internalApplicationSchema.parse(req.body);
+    const { jobId, fullName, email: email3, password, age, qualification, yearsOfExperience, currentCompany, skills, resumeUrl, coverLetter, acceptedTerms } = body;
+    let user;
+    const [existingUser] = await db.select().from(usersTable).where(eq(usersTable.email, email3));
+    if (!existingUser) {
+      const passwordHash = await bcrypt.hash(password, 10);
+      const [newUser] = await db.insert(usersTable).values({
+        name: fullName,
+        email: email3,
+        passwordHash,
+        provider: "email",
+        role: "user"
+      }).returning();
+      user = newUser;
+    } else {
+      user = existingUser;
+      if (req.session?.userId !== user.id) {
+        const match = await bcrypt.compare(password, user.passwordHash || "");
+        if (!match) {
+          res.status(401).json({ error: "Incorrect password for existing account." });
+          return;
+        }
+      }
+    }
+    if (req.session) {
+      req.session.userId = user.id;
+      req.session.userRole = user.role;
+    }
+    const [existingApp] = await db.select().from(applicationsTable).where(and(eq(applicationsTable.jobId, jobId), eq(applicationsTable.applicantEmail, email3)));
+    if (existingApp) {
+      res.status(400).json({ error: "You have already applied for this job." });
+      return;
+    }
+    const [app2] = await db.insert(applicationsTable).values({
+      jobId,
+      userId: user.id,
+      applicantName: fullName,
+      applicantEmail: email3,
+      age,
+      qualification,
+      yearsOfExperience: yearsOfExperience?.toString(),
+      currentCompany,
+      skills,
+      resumeUrl,
+      coverLetter,
+      acceptedTerms: !!acceptedTerms,
+      status: "Pending"
+    }).returning();
+    sendApplicationConfirmationEmail(app2.id);
+    res.status(201).json({ success: true, applicationId: app2.id });
+  } catch (err) {
+    console.error("Internal application submission error:", err);
+    res.status(500).json({ error: err.message || "Failed to submit application" });
+  }
+});
+router3.post("/applications/track", async (req, res) => {
+  const { jobId, applicantName, applicantEmail } = req.body;
+  if (!jobId) {
+    res.status(400).json({ error: "Job ID is required" });
+    return;
+  }
+  try {
+    const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
+    if (!job) {
+      res.status(404).json({ error: "Job not found" });
+      return;
+    }
+    const user = await getSessionUser(req);
+    const email3 = user?.email || applicantEmail || "guest@opportunet.com";
+    const name = user?.name || applicantName || "Guest User";
+    const [existing] = await db.select().from(applicationsTable).where(and(eq(applicationsTable.jobId, jobId), eq(applicationsTable.applicantEmail, email3)));
+    let app2;
+    if (existing) {
+      if (existing.status !== "Redirected") {
+        [app2] = await db.update(applicationsTable).set({ status: "Redirected" }).where(eq(applicationsTable.id, existing.id)).returning();
+      } else {
+        app2 = existing;
+      }
+    } else {
+      [app2] = await db.insert(applicationsTable).values({
+        jobId,
+        userId: user?.id || null,
+        applicantName: name,
+        applicantEmail: email3,
+        status: "Redirected",
+        acceptedTerms: true
+      }).returning();
+    }
+    const normalizedJob = normalizeJobRecord(job);
+    sendApplicationConfirmationEmail(app2.id);
+    res.json({
+      trackingId: app2.id,
+      officialUrl: normalizedJob.official_url,
+      official_url: normalizedJob.official_url,
+      applicationLink: normalizedJob.applicationLink,
+      hrEmail: normalizedJob.hrEmail || buildDefaultHrEmail(job.company),
+      success: true
+    });
+  } catch (err) {
+    console.error("Track application error:", err);
+    res.status(500).json({ error: err.message || "Failed to track application" });
+  }
+});
+router3.post("/upload-resume", upload.single("resume"), (req, res) => {
+  if (!req.file) {
+    res.status(400).json({ error: "No resume file provided" });
+    return;
+  }
+  res.json({ url: `/uploads/${req.file.filename}` });
+});
 router3.use("/applications", requireAuth);
 async function getSessionUser(req) {
   if (!req.session?.userId) return null;
@@ -78154,37 +78339,6 @@ router3.get("/jobs/:id/applicant-count", async (req, res) => {
     jobId: params.id,
     total: apps.length,
     byStatus
-  });
-});
-router3.post("/applications/track", async (req, res) => {
-  const { jobId, applicantName, applicantEmail } = req.body;
-  if (!jobId || !applicantName || !applicantEmail) {
-    res.status(400).json({ error: "Missing required fields" });
-    return;
-  }
-  const [job] = await db.select().from(jobsTable).where(eq(jobsTable.id, jobId));
-  if (!job) {
-    res.status(404).json({ error: "Job not found" });
-    return;
-  }
-  const user = await getSessionUser(req);
-  const [app2] = await db.insert(applicationsTable).values({
-    jobId,
-    userId: user?.id,
-    applicantName: user?.name || applicantName,
-    applicantEmail: user?.email || applicantEmail,
-    status: "Redirected",
-    acceptedTerms: true
-  }).returning();
-  const normalizedJob = normalizeJobRecord(job);
-  sendApplicationConfirmationEmail(app2.id);
-  res.json({
-    trackingId: app2.id,
-    officialUrl: normalizedJob.official_url,
-    official_url: normalizedJob.official_url,
-    applicationLink: normalizedJob.applicationLink,
-    hrEmail: normalizedJob.hrEmail || buildDefaultHrEmail(job.company),
-    success: true
   });
 });
 router3.get("/applications/summary", async (req, res) => {
@@ -96405,19 +96559,46 @@ router10.get("/recommendations", requireAuth, async (req, res) => {
 });
 var ai_default = router10;
 
-// src/routes/index.ts
+// src/routes/analytics.ts
+var import_express11 = __toESM(require_express2(), 1);
 var router11 = (0, import_express11.Router)();
-router11.use(health_default);
-router11.use("/auth", auth_default);
-router11.use("/admin", admin_default);
-router11.use(jobs_default);
-router11.use(applications_default);
-router11.use(exams_default);
-router11.use("/colleges", colleges_default);
-router11.use("/companies", companies_default);
-router11.use("/payments", payments_default);
-router11.use("/ai", ai_default);
-var routes_default = router11;
+router11.post("/analytics/events", async (req, res) => {
+  const { eventType, eventCategory, eventAction, eventLabel, eventValue, page, route, metadata } = req.body;
+  try {
+    const userId = req.session?.userId || null;
+    await db.insert(analyticsEventsTable).values({
+      userId,
+      eventType: eventType || "unspecified",
+      eventCategory,
+      eventAction: eventAction || "click",
+      eventLabel,
+      eventValue,
+      page,
+      route,
+      metadata: metadata || {}
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Failed to insert analytics event:", err);
+    res.status(500).json({ error: err.message || "Failed to log event" });
+  }
+});
+var analytics_default = router11;
+
+// src/routes/index.ts
+var router12 = (0, import_express12.Router)();
+router12.use(health_default);
+router12.use("/auth", auth_default);
+router12.use("/admin", admin_default);
+router12.use(jobs_default);
+router12.use(applications_default);
+router12.use(exams_default);
+router12.use("/colleges", colleges_default);
+router12.use("/companies", companies_default);
+router12.use("/payments", payments_default);
+router12.use("/ai", ai_default);
+router12.use(analytics_default);
+var routes_default = router12;
 
 // src/lib/logger.ts
 var import_pino = __toESM(require_pino(), 1);
@@ -96438,7 +96619,7 @@ var logger = (0, import_pino.default)({
 });
 
 // src/app.ts
-var app = (0, import_express12.default)();
+var app = (0, import_express13.default)();
 var PgSession2 = (0, import_connect_pg_simple.default)(import_express_session.default);
 app.use(
   (0, import_pino_http.default)({
@@ -96457,8 +96638,8 @@ app.use((0, import_cors.default)({
   origin: true,
   credentials: true
 }));
-app.use(import_express12.default.json());
-app.use(import_express12.default.urlencoded({ extended: true }));
+app.use(import_express13.default.json());
+app.use(import_express13.default.urlencoded({ extended: true }));
 var sessionSecret = process.env.SESSION_SECRET || "govportal-secret-key-change-in-production";
 var databaseUrl = process.env.DATABASE_URL;
 app.use((0, import_express_session.default)({
@@ -96479,7 +96660,7 @@ app.use((0, import_express_session.default)({
   }
 }));
 app.get("/", (req, res) => res.redirect("/api/health"));
-app.use("/uploads", import_express12.default.static("uploads"));
+app.use("/uploads", import_express13.default.static("uploads"));
 app.use("/api", routes_default);
 var app_default = app;
 

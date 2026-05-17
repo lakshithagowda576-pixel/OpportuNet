@@ -1,4 +1,5 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
+import { setBaseUrl } from "@workspace/api-client-react";
 import "./lib/i18n";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
@@ -56,9 +57,15 @@ function Router() {
   );
 }
 
+const apiUrl = import.meta.env.VITE_API_URL;
+if (apiUrl) {
+  setBaseUrl(apiUrl);
+}
+
 function App() {
   console.log("App initializing...", {
     BASE_URL: import.meta.env.BASE_URL,
+    VITE_API_URL: apiUrl,
     SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
     SUPABASE_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY ? "EXISTS" : "MISSING"
   });
