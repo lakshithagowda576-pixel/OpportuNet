@@ -1,5 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "pnpm run build:vercel",
+  "buildCommand": "pnpm --filter @workspace/job-portal run build",
   "outputDirectory": "artifacts/job-portal/dist/public"
 }
