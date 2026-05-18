@@ -1,5 +1,0 @@
-{
-  "version": 2,
-  "buildCommand": "pnpm --filter @workspace/job-portal run build",
-  "outputDirectory": "public"
-}
