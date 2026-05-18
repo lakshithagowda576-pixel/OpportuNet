@@ -96664,7 +96664,7 @@ app.use("/uploads", import_express13.default.static("uploads"));
 app.use("/api", routes_default);
 var publicPath = path2.resolve(__dirname, "../../public");
 app.use(import_express13.default.static(publicPath));
-app.get("*", (req, res) => {
+app.get(/.*/, (req, res) => {
   res.sendFile(path2.resolve(publicPath, "index.html"));
 });
 var app_default = app;

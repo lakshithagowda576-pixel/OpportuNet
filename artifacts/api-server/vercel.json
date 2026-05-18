@@ -1,0 +1,9 @@
+{
+  "buildCommand": "pnpm install && pnpm -r build",
+  "devCommand": "pnpm run dev",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": "express",
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

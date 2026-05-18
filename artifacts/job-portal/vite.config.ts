@@ -25,6 +25,8 @@ export default defineConfig({
   build: {
     outDir: "../../public",
     emptyOutDir: true,
+    sourcemap: false,
+    chunkSizeWarningLimit: 1000,
   },
   server: {
     port,

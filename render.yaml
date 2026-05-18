@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: opportu-net-api
+    runtime: node
+    rootDir: artifacts/api-server
+    buildCommand: pnpm install && pnpm -r build
+    startCommand: node --enable-source-maps ./dist/index.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20.11.0"

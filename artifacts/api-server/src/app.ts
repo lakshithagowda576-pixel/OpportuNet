@@ -60,7 +60,7 @@ const publicPath = path.resolve(__dirname, "../../public");
 app.use(express.static(publicPath));
 
 // For all other non-API routes, send the React index.html for client-side routing
-app.get("*", (req: Request, res: Response) => {
+app.get(/.*/, (req: Request, res: Response) => {
   res.sendFile(path.resolve(publicPath, "index.html"));
 });
 
