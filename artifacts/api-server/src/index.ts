@@ -4,7 +4,7 @@ import { logger } from "./lib/logger";
 import { db } from "@workspace/db";
 import { jobsTable, examsTable, studyMaterialsTable, usersTable, applicationsTable } from "@workspace/db/schema";
 import { count, eq } from "drizzle-orm";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { IT_JOBS, NONIT_JOBS, STATE_GOVT_JOBS, CENTRAL_GOVT_JOBS, buildJobRows } from "./lib/seed-data";
 import { seedColleges } from "./lib/seed-colleges";
 import { seedCompanies } from "./lib/seed-companies";

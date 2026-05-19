@@ -6,6 +6,7 @@ import connectPgSimple from "connect-pg-simple";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import path from "path";
+import fs from "node:fs";
 
 const app: Express = express();
 
@@ -56,7 +57,22 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api", router);
 
 // Serve the frontend portal statically from the root public directory
-const publicPath = path.resolve(__dirname, "../../public");
+// Dynamically resolve the public directory depending on whether we run locally or on Vercel/Render
+let publicPath = path.resolve(__dirname, "../../public");
+
+const candidatePaths = [
+  path.resolve(__dirname, "../public"),       // Vercel deployment (api/index.mjs -> public/)
+  path.resolve(__dirname, "../../../public"),  // Local dist (artifacts/api-server/dist/index.mjs -> public/)
+  path.resolve(__dirname, "../../public"),     // Local dev / fallback
+];
+
+for (const p of candidatePaths) {
+  if (fs.existsSync(path.join(p, "index.html"))) {
+    publicPath = p;
+    break;
+  }
+}
+
 app.use(express.static(publicPath));
 
 // For all other non-API routes, send the React index.html for client-side routing

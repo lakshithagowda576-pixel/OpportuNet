@@ -12,7 +12,7 @@ import {
 import { buildDefaultHrEmail, normalizeJobRecord } from "../lib/normalize-job";
 import { requireAuth } from "../middleware/requireAuth";
 import { sendApplicationConfirmationEmail, sendPreRegistrationConfirmationEmail } from "../lib/email-service";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
