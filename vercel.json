@@ -1,22 +1,22 @@
 {
   "version": 2,
   "installCommand": "npm i -g pnpm@latest && pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm run vercel-build",
+  "buildCommand": "pnpm -C artifacts/job-portal run build && pnpm -C artifacts/api-server run build",
   "outputDirectory": ".",
   "framework": null,
   "functions": {
-    "api/index.mjs": {
+    "api/index.ts": {
       "maxDuration": 30
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.mjs"
+      "destination": "/api/index.ts"
     },
     {
       "source": "/(.*)",
-      "destination": "/api/index.mjs"
+      "destination": "/api/index.ts"
     }
   ]
 }
