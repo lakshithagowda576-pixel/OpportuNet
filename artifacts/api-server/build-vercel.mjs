@@ -9,14 +9,24 @@ import { rm } from "node:fs/promises";
 globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
+// Repo root is two levels up from artifacts/api-server/
+const repoRoot = path.resolve(artifactDir, "../../");
 
 async function buildVercel() {
-  const distDir = path.resolve(artifactDir, "dist-vercel");
-  await rm(distDir, { recursive: true, force: true });
+  // Output directly into the api/ folder so there are no cross-directory imports
+  const distDir = path.resolve(repoRoot, "api");
+  // Clean generated pino worker files and old bundle
+  for (const f of ["index.mjs", "pino-file.mjs", "pino-pretty.mjs", "pino-worker.mjs", "thread-stream-worker.mjs"]) {
+    await rm(path.join(distDir, f), { force: true });
+  }
+  // Also clean old dist-vercel if it exists
+  await rm(path.resolve(artifactDir, "dist-vercel"), { recursive: true, force: true });
+
 
   await esbuild({
-    // Build app.ts (not index.ts) — app exports the Express app without listen()
-    entryPoints: [path.resolve(artifactDir, "src/app.ts")],
+    // Build app.ts directly into api/index.mjs — self-contained Vercel entrypoint
+    // esbuild-plugin-pino adds extra worker entry points, so we must use outdir (not outfile)
+    entryPoints: [{ in: path.resolve(artifactDir, "src/app.ts"), out: "index" }],
     platform: "node",
     bundle: true,
     format: "esm",
@@ -97,7 +107,7 @@ async function buildVercel() {
       "puppeteer-core",
       "electron",
     ],
-    sourcemap: "linked",
+    sourcemap: false,
     plugins: [
       esbuildPluginPino({ transports: ["pino-pretty"] })
     ],
@@ -113,7 +123,7 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     },
   });
 
-  console.log("✅ Vercel build complete → dist-vercel/app.mjs");
+  console.log("✅ Vercel build complete → api/index.mjs (self-contained)");
 }
 
 buildVercel().catch((err) => {
