@@ -20,7 +20,8 @@ async function buildVercel() {
     platform: "node",
     bundle: true,
     format: "esm",
-    outfile: path.resolve(artifactDir, "../../api/index.mjs"),
+    outdir: distDir,
+    outExtension: { ".js": ".mjs" },
     logLevel: "info",
     external: [
       "*.node",
