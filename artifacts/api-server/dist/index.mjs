@@ -98384,21 +98384,21 @@ app.use((0, import_express_session.default)({
 }));
 app.use("/uploads", import_express13.default.static("uploads"));
 app.use("/api", routes_default);
-var publicPath = path2.resolve(__dirname, "../../public");
-var candidatePaths = [
-  path2.resolve(__dirname, "../public"),
-  // Vercel deployment (api/index.mjs -> public/)
-  path2.resolve(__dirname, "../../../public"),
-  // Local dist (artifacts/api-server/dist/index.mjs -> public/)
-  path2.resolve(__dirname, "../../public")
-  // Local dev / fallback
-];
-for (const p of candidatePaths) {
-  if (fs2.existsSync(path2.join(p, "index.html"))) {
-    publicPath = p;
-    break;
+function resolvePublicPath() {
+  const candidates = [
+    path2.join(process.cwd(), "public"),
+    path2.resolve(__dirname, "../public"),
+    path2.resolve(__dirname, "../../../public"),
+    path2.resolve(__dirname, "../../public")
+  ];
+  for (const dir of candidates) {
+    if (fs2.existsSync(path2.join(dir, "index.html"))) {
+      return dir;
+    }
   }
+  return path2.resolve(__dirname, "../../public");
 }
+var publicPath = resolvePublicPath();
 app.use(import_express13.default.static(publicPath));
 app.get(/.*/, (req, res) => {
   res.sendFile(path2.resolve(publicPath, "index.html"));

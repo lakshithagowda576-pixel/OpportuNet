@@ -56,22 +56,25 @@ app.use(session({
 app.use("/uploads", express.static("uploads"));
 app.use("/api", router);
 
-// Serve the frontend portal statically from the root public directory
-// Dynamically resolve the public directory depending on whether we run locally or on Vercel/Render
-let publicPath = path.resolve(__dirname, "../../public");
+/** Resolve `public/` at runtime (Vercel Lambda cwd, bundled api/, or local dist). */
+function resolvePublicPath(): string {
+  const candidates = [
+    path.join(process.cwd(), "public"),
+    path.resolve(__dirname, "../public"),
+    path.resolve(__dirname, "../../../public"),
+    path.resolve(__dirname, "../../public"),
+  ];
 
-const candidatePaths = [
-  path.resolve(__dirname, "../public"),       // Vercel deployment (api/index.mjs -> public/)
-  path.resolve(__dirname, "../../../public"),  // Local dist (artifacts/api-server/dist/index.mjs -> public/)
-  path.resolve(__dirname, "../../public"),     // Local dev / fallback
-];
-
-for (const p of candidatePaths) {
-  if (fs.existsSync(path.join(p, "index.html"))) {
-    publicPath = p;
-    break;
+  for (const dir of candidates) {
+    if (fs.existsSync(path.join(dir, "index.html"))) {
+      return dir;
+    }
   }
+
+  return path.resolve(__dirname, "../../public");
 }
+
+const publicPath = resolvePublicPath();
 
 app.use(express.static(publicPath));
 
