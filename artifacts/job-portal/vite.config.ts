@@ -26,8 +26,10 @@ export default defineConfig({
     outDir: "../../public",
     emptyOutDir: true,
     sourcemap: false,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 2000,
+    reportCompressedSize: false,
   },
+  logLevel: "info",
   server: {
     port,
     host: "0.0.0.0",

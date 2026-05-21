@@ -77,8 +77,8 @@ function resolvePublicPath(): string {
 const publicPath = resolvePublicPath();
 const indexHtml = path.join(publicPath, "index.html");
 
-if (!fs.existsSync(indexHtml)) {
-  logger.warn({ publicPath, cwd: process.cwd() }, "public/index.html not found — SPA routes will return 503");
+if (!fs.existsSync(indexHtml) && process.env.NODE_ENV !== "production") {
+  logger.debug({ publicPath, cwd: process.cwd() }, "public/index.html not found");
 }
 
 app.use(express.static(publicPath));
@@ -92,12 +92,12 @@ app.get(/^(?!\/api(?:\/|$)).*/, (req: Request, res: Response, next) => {
     return next();
   }
   if (!fs.existsSync(indexHtml)) {
-    return res.status(503).json({ error: "Frontend not built. Run job-portal build before deploy." });
+    return res.status(503).send("Service temporarily unavailable");
   }
   res.sendFile(indexHtml, (err) => {
     if (err && !res.headersSent) {
-      logger.error({ err, publicPath }, "Failed to send index.html");
-      res.status(500).json({ error: "Failed to load page" });
+      logger.debug({ err, publicPath }, "sendFile failed");
+      res.status(500).send("Internal Server Error");
     }
   });
 });
