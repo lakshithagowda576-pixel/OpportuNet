@@ -98399,9 +98399,27 @@ function resolvePublicPath() {
   return path2.resolve(__dirname, "../../public");
 }
 var publicPath = resolvePublicPath();
+var indexHtml = path2.join(publicPath, "index.html");
+if (!fs2.existsSync(indexHtml)) {
+  logger.warn({ publicPath, cwd: process.cwd() }, "public/index.html not found \u2014 SPA routes will return 503");
+}
 app.use(import_express13.default.static(publicPath));
-app.get(/.*/, (req, res) => {
-  res.sendFile(path2.resolve(publicPath, "index.html"));
+app.get(/^(?!\/api(?:\/|$)).*/, (req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    return next();
+  }
+  if (path2.extname(req.path)) {
+    return next();
+  }
+  if (!fs2.existsSync(indexHtml)) {
+    return res.status(503).json({ error: "Frontend not built. Run job-portal build before deploy." });
+  }
+  res.sendFile(indexHtml, (err) => {
+    if (err && !res.headersSent) {
+      logger.error({ err, publicPath }, "Failed to send index.html");
+      res.status(500).json({ error: "Failed to load page" });
+    }
+  });
 });
 var app_default = app;
 

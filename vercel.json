@@ -4,9 +4,13 @@
   "buildCommand": "pnpm run vercel-build",
   "outputDirectory": ".",
   "framework": null,
+  "env": {
+    "NODE_ENV": "production"
+  },
   "functions": {
     "api/index.mjs": {
       "maxDuration": 30,
+      "memory": 1024,
       "includeFiles": "public/**"
     }
   },

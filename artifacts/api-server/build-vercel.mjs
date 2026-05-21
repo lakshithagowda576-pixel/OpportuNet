@@ -26,7 +26,7 @@ async function buildVercel() {
   await esbuild({
     // Build app.ts directly into api/index.mjs — self-contained Vercel entrypoint
     // esbuild-plugin-pino adds extra worker entry points, so we must use outdir (not outfile)
-    entryPoints: [{ in: path.resolve(artifactDir, "src/app.ts"), out: "index" }],
+    entryPoints: [{ in: path.resolve(artifactDir, "src/vercel.ts"), out: "index" }],
     platform: "node",
     bundle: true,
     format: "esm",
@@ -107,7 +107,8 @@ async function buildVercel() {
     ],
     sourcemap: false,
     plugins: [
-      esbuildPluginPino({ transports: ["pino-pretty"] })
+      // No pino-pretty on Vercel — avoids worker thread errors in Lambda
+      esbuildPluginPino({ transports: [] }),
     ],
     banner: {
       js: `import { createRequire as __bannerCrReq } from 'node:module';

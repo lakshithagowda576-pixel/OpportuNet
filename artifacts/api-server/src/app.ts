@@ -75,12 +75,31 @@ function resolvePublicPath(): string {
 }
 
 const publicPath = resolvePublicPath();
+const indexHtml = path.join(publicPath, "index.html");
+
+if (!fs.existsSync(indexHtml)) {
+  logger.warn({ publicPath, cwd: process.cwd() }, "public/index.html not found — SPA routes will return 503");
+}
 
 app.use(express.static(publicPath));
 
-// For all other non-API routes, send the React index.html for client-side routing
-app.get(/.*/, (req: Request, res: Response) => {
-  res.sendFile(path.resolve(publicPath, "index.html"));
+// SPA fallback: skip /api and requests for static files (e.g. /assets/*.js)
+app.get(/^(?!\/api(?:\/|$)).*/, (req: Request, res: Response, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    return next();
+  }
+  if (path.extname(req.path)) {
+    return next();
+  }
+  if (!fs.existsSync(indexHtml)) {
+    return res.status(503).json({ error: "Frontend not built. Run job-portal build before deploy." });
+  }
+  res.sendFile(indexHtml, (err) => {
+    if (err && !res.headersSent) {
+      logger.error({ err, publicPath }, "Failed to send index.html");
+      res.status(500).json({ error: "Failed to load page" });
+    }
+  });
 });
 
 export default app;

@@ -40,6 +40,7 @@
     "passport-local": "^1.0.0",
     "pino": "^9",
     "pino-http": "^10",
+    "serverless-http": "^4.0.0",
     "stripe": "^22.1.0",
     "zod": "catalog:"
   },
