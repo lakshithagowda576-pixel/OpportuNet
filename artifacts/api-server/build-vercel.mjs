@@ -32,7 +32,7 @@ async function buildVercel() {
     format: "esm",
     outdir: distDir,
     outExtension: { ".js": ".mjs" },
-    logLevel: "info",
+    logLevel: "silent",
     external: [
       "*.node",
       "sharp",
@@ -122,7 +122,7 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     },
   });
 
-  console.log("✅ Vercel build complete → api/index.mjs (self-contained)");
+  process.stdout.write("API bundle written to api/index.mjs\n");
 }
 
 buildVercel().catch((err) => {

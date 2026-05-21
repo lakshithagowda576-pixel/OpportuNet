@@ -43,7 +43,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 2000,
     reportCompressedSize: false,
   },
-  logLevel: "info",
+  // "error" keeps successful builds quiet (no stderr noise on Windows/PowerShell)
+  logLevel: process.env.VITE_LOG_LEVEL ?? (process.argv.includes("build") ? "error" : "info"),
   server: {
     port,
     host: "0.0.0.0",
