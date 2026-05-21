@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
@@ -6,10 +6,24 @@ import path from "path";
 const port = Number(process.env.PORT) || 5173;
 const basePath = process.env.BASE_PATH || "/";
 
+/** Next.js-only directive; strip so Vite production builds stay clean. */
+function stripUseClient(): Plugin {
+  return {
+    name: "strip-use-client",
+    enforce: "pre",
+    transform(code, id) {
+      if (!/\.[tj]sx?$/.test(id)) return;
+      const stripped = code.replace(/^\s*["']use client["'];?\s*\r?\n/, "");
+      if (stripped !== code) return { code: stripped, map: null };
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   envDir: path.resolve(import.meta.dirname, "../../"),
   plugins: [
+    stripUseClient(),
     react(),
     tailwindcss(),
   ],
