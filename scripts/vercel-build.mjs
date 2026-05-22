@@ -5,19 +5,17 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 function runStep(label, command, args, cwd) {
   process.stdout.write(`${label}\n`);
-  const useShell = process.platform === "win32";
-  const commandString = useShell
-    ? [command, ...args]
-        .map((part) => (/\s/.test(part) ? `"${part}"` : part))
-        .join(" ")
-    : command;
-  const result = spawnSync(commandString, useShell ? [] : args, {
+  const commandString = [command, ...args]
+    .map((part) => (/\s/.test(part) ? `"${part}"` : part))
+    .join(" ");
+  const result = spawnSync(commandString, {
     cwd,
     stdio: "inherit",
     env: { ...process.env, NODE_ENV: "production" },
-    shell: useShell,
+    shell: true,
   });
   if (result.status !== 0 || result.error) {
+    console.error(`Command failed: ${commandString}`);
     if (result.error) {
       console.error("Build runner error:", result.error);
     }

@@ -32,7 +32,7 @@ async function buildVercel() {
     format: "esm",
     outdir: distDir,
     outExtension: { ".js": ".mjs" },
-    logLevel: "info",
+    logLevel: "debug",
     external: [
       "*.node",
       "sharp",
