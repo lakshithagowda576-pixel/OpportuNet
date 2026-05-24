@@ -3,12 +3,11 @@
   "private": true,
   "scripts": {
     "dev": "pnpm -r --filter \"@workspace/api-server\" --filter \"@workspace/job-portal\" --parallel dev",
-    "build": "tsc",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck": "tsc --build && pnpm -r --if-present run typecheck",
     "seed": "pnpm -C scripts run seed --env-file=.env",
     "vercel-build": "cd artifacts/job-portal && pnpm run build && cd ../api-server && pnpm run build"
   },
-
   "devDependencies": {
     "prettier": "^3.8.1",
     "typescript": "~5.9.2"
