@@ -30,7 +30,7 @@ function runStep(label, command, args, cwd) {
 }
 
 runStep(
-  "Building job portal…",
+  "Building frontend job portal…",
   "pnpm",
   ["run", "build"],
   path.join(root, "artifacts/job-portal"),
