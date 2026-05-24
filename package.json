@@ -2,10 +2,11 @@
   "name": "opportu-net-workspace",
   "private": true,
   "scripts": {
+    "build": "pnpm run vercel-build",
     "vercel-build": "cd artifacts/job-portal && npm run build && cd ../api-server && npm run build"
   },
   "devDependencies": {
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": "20.x"
