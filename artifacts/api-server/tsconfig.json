@@ -4,11 +4,23 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": false,
+    "rootDir": "../../",
+    "skipLibCheck": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "baseUrl": ".",
+    "paths": {
+      "@workspace/db": ["../../lib/db/src/index.ts"],
+      "@workspace/db/schema": ["../../lib/db/src/schema/index.ts"],
+      "@workspace/api-zod": ["../../lib/api-zod/src/index.ts"]
+    },
+    "strict": false,
+    "noImplicitAny": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "noEmit": false,
+    "allowJs": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../lib/db/src/**/*", "../../lib/api-zod/src/**/*", "../../lib/integrations/**/*"],
   "exclude": ["node_modules", "dist"]
 }

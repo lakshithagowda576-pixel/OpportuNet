@@ -7,19 +7,20 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@workspace/api-zod': path.resolve(__dirname, '../../lib/api-zod/src'),
     },
+  },
+  css: {
+    postcss: false,
   },
   build: {
     outDir: 'dist',
-  },
-  optimizeDeps: {
-    exclude: ['@workspace/api-zod'],
   },
   server: {
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:3008',
         changeOrigin: true,
       },
     },
