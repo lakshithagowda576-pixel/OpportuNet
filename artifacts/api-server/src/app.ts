@@ -95,32 +95,39 @@ function resolvePublicPath(): string {
   return path.resolve(__dirname, "../../public");
 }
 
+// Serve frontend static files only when explicitly enabled (production or SERVE_FRONTEND=true).
 const publicPath = resolvePublicPath();
 const indexHtml = path.join(publicPath, "index.html");
 
-if (!fs.existsSync(indexHtml) && process.env.NODE_ENV !== "production") {
-  logger.debug({ publicPath, cwd: process.cwd() }, "public/index.html not found");
-}
+const serveFrontend = process.env.SERVE_FRONTEND === 'true' || process.env.NODE_ENV === 'production';
 
-app.use(express.static(publicPath));
+if (serveFrontend) {
+  if (!fs.existsSync(indexHtml) && process.env.NODE_ENV !== "production") {
+    logger.debug({ publicPath, cwd: process.cwd() }, "public/index.html not found");
+  }
 
-// SPA fallback: skip /api and requests for static files (e.g. /assets/*.js)
-app.get(/^(?!\/api(?:\/|$)).*/, (req: Request, res: Response, next) => {
-  if (req.method !== "GET" && req.method !== "HEAD") {
-    return next();
-  }
-  if (path.extname(req.path)) {
-    return next();
-  }
-  if (!fs.existsSync(indexHtml)) {
-    return res.status(503).send("Service temporarily unavailable");
-  }
-  res.sendFile(indexHtml, (err) => {
-    if (err && !res.headersSent) {
-      logger.debug({ err, publicPath }, "sendFile failed");
-      res.status(500).send("Internal Server Error");
+  app.use(express.static(publicPath));
+
+  // SPA fallback: skip /api and requests for static files (e.g. /assets/*.js)
+  app.get(/^(?!\/api(?:\/|$)).*/, (req: Request, res: Response, next) => {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      return next();
     }
+    if (path.extname(req.path)) {
+      return next();
+    }
+    if (!fs.existsSync(indexHtml)) {
+      return res.status(503).send("Service temporarily unavailable");
+    }
+    res.sendFile(indexHtml, (err) => {
+      if (err && !res.headersSent) {
+        logger.debug({ err, publicPath }, "sendFile failed");
+        res.status(500).send("Internal Server Error");
+      }
+    });
   });
-});
+} else {
+  logger.debug({ serveFrontend }, 'Frontend static serving disabled (dev)');
+}
 
 export default app;
