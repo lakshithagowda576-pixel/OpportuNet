@@ -10,8 +10,8 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ApplyPage: React.FC = () => {
-  const [, params] = useRoute("/jobs/:id/apply") as any;
-  const jobId = params?.id ? Number(params.id) : NaN;
+  const [, params] = useRoute("/jobs/:id/apply");
+  const jobId = Number(params?.id);
   const [company, setCompany] = useState<any>(null);
   const [isLoadingCompany, setIsLoadingCompany] = useState(false);
 
