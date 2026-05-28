@@ -7,7 +7,9 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import path from "path";
 import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app: Express = express();
 
 const PgSession = connectPgSimple(session);
@@ -26,8 +28,27 @@ app.use(
   }),
 );
 
+// Tighten CORS: prefer FRONTEND_URL (comma-separated) if provided, else fall back to permissive for dev.
+const frontendUrlEnv = process.env.FRONTEND_URL || "";
+const allowedOrigins = frontendUrlEnv.split(",").map(s => s.trim()).filter(Boolean);
+
 app.use(cors({
-  origin: true,
+  origin(origin, callback) {
+    // Allow non-browser requests (curl, server-to-server) when no origin present
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.length === 0) {
+      // No explicit FRONTEND_URL set — allow any origin (legacy behavior)
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Deny unknown origins
+    return callback(new Error('CORS policy does not allow access from this origin.'), false);
+  },
   credentials: true,
 }));
 app.use(express.json());
