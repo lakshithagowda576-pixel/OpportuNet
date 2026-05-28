@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -20,7 +20,11 @@ import {
   LayoutDashboard,
   Sparkles,
   ExternalLink,
-  Calendar
+  Calendar,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Zap
 } from "lucide-react";
 import { JobCard } from "@/components/JobCard";
 import { cn } from "@/lib/utils";
@@ -36,6 +40,31 @@ export default function Dashboard() {
       enabled: !!user 
     } 
   });
+
+  // Group applications by recent days (last 7 days)
+  const recentActivityByDay = useMemo(() => {
+    if (!applications) return {};
+    
+    const grouped: Record<string, any[]> = {};
+    const today = new Date();
+    
+    applications.forEach((app: any) => {
+      const appDate = new Date(app.appliedAt);
+      const diffTime = today.getTime() - appDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      let dayLabel = "";
+      if (diffDays === 0) dayLabel = "Today";
+      else if (diffDays === 1) dayLabel = "Yesterday";
+      else if (diffDays < 7) dayLabel = `${diffDays} days ago`;
+      else return;
+      
+      if (!grouped[dayLabel]) grouped[dayLabel] = [];
+      grouped[dayLabel].push(app);
+    });
+    
+    return grouped;
+  }, [applications]);
 
   useEffect(() => {
     trackEvent({
@@ -295,53 +324,175 @@ export default function Dashboard() {
         </motion.section>
       )}
 
+      {/* Recent Days Activity Timeline */}
+      {Object.keys(recentActivityByDay).length > 0 && (
+        <motion.section variants={itemVariants} className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-[3rem] p-8 md:p-12 border border-border shadow-xl overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/10 to-transparent -z-0 blur-2xl"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white shadow-lg shadow-primary/30">
+                <Zap className="w-7 h-7" />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-display font-black text-foreground">Recent Days Activity</h2>
+                <p className="text-sm text-muted-foreground font-medium mt-1">Your applications from the last 7 days</p>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              {["Today", "Yesterday", "2 days ago", "3 days ago", "4 days ago", "5 days ago", "6 days ago"].map((dayLabel, index) => 
+                recentActivityByDay[dayLabel] && recentActivityByDay[dayLabel].length > 0 ? (
+                  <motion.div
+                    key={dayLabel}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="relative"
+                  >
+                    {/* Timeline Connector */}
+                    {index !== Object.keys(recentActivityByDay).length - 1 && (
+                      <div className="absolute left-6 top-16 w-1 h-8 bg-gradient-to-b from-primary/60 to-transparent"></div>
+                    )}
+                    
+                    <div className="flex items-start gap-6">
+                      {/* Timeline Dot */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white shadow-lg shadow-primary/40 z-10 relative border-4 border-background">
+                          {dayLabel === "Today" ? (
+                            <Zap className="w-5 h-5" />
+                          ) : dayLabel === "Yesterday" ? (
+                            <Clock className="w-5 h-5" />
+                          ) : (
+                            <Calendar className="w-5 h-5" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Activities Container */}
+                      <div className="flex-1 mt-1">
+                        <div className="mb-3 flex items-center justify-between">
+                          <h3 className="text-lg font-display font-black text-foreground">{dayLabel}</h3>
+                          <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-black">{recentActivityByDay[dayLabel].length} application{recentActivityByDay[dayLabel].length > 1 ? 's' : ''}</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {recentActivityByDay[dayLabel].map((app: any) => (
+                            <motion.div
+                              key={app.id}
+                              whileHover={{ y: -4 }}
+                              className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-border hover:border-primary/50 shadow-sm hover:shadow-lg transition-all group"
+                            >
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-primary">
+                                  {app.examId ? (
+                                    <GraduationCap className="w-5 h-5" />
+                                  ) : (
+                                    <Briefcase className="w-5 h-5" />
+                                  )}
+                                </div>
+                                <span className={cn(
+                                  "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5",
+                                  app.status === "Pending" ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900" :
+                                  app.status === "Offered" ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900" :
+                                  app.status === "Reviewed" ? "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900" :
+                                  "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600"
+                                )}>
+                                  {app.status === "Pending" && <Clock className="w-3 h-3" />}
+                                  {app.status === "Offered" && <CheckCircle className="w-3 h-3" />}
+                                  {app.status === "Reviewed" && <AlertCircle className="w-3 h-3" />}
+                                  {app.status}
+                                </span>
+                              </div>
+
+                              <h4 className="font-bold text-foreground text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+                                {app.examId ? app.examName : app.job?.title || "Application"}
+                              </h4>
+                              <p className="text-xs text-muted-foreground font-medium mb-3">
+                                {app.examId ? "KEA Karnataka" : app.job?.company || "Company"}
+                              </p>
+
+                              <div className="pt-3 border-t border-border/50 flex items-center justify-between text-[10px]">
+                                <span className="text-muted-foreground font-black uppercase">Applied</span>
+                                <span className="font-bold text-foreground">
+                                  {new Date(app.appliedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : null
+              )}
+            </div>
+
+            <div className="mt-12 pt-8 border-t border-border/50">
+              <Link href="/applications" className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-primary text-white font-black hover:bg-primary/90 transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40">
+                <FileText className="w-5 h-5" />
+                View Complete Application History
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </motion.section>
+      )}
+
       {/* Recent Activity */}
       {applications && applications.length > 0 && (
-        <motion.section variants={itemVariants} className="bg-card rounded-[3rem] p-10 border border-border shadow-sm">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-display font-black text-foreground flex items-center gap-3">
-              <FileText className="w-8 h-8 text-primary" /> Your Recent Activity
+        <motion.section variants={itemVariants} className="bg-card rounded-[3rem] p-8 md:p-10 border border-border shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <h2 className="text-2xl md:text-3xl font-display font-black text-foreground flex items-center gap-3">
+              <FileText className="w-8 h-8 text-primary" /> Your Submissions
             </h2>
-            <Link href="/applications" className="text-sm font-bold text-primary hover:underline">
-              Track All Applications
+            <Link href="/applications" className="text-sm font-bold text-primary hover:underline whitespace-nowrap">
+              View All
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {applications.slice(0, 3).map((app: any) => (
-              <div key={app.id} className="p-6 bg-secondary/30 rounded-2xl border border-border/50 hover:bg-secondary/50 transition-all group">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {applications.slice(0, 6).map((app: any) => (
+              <motion.div
+                key={app.id}
+                whileHover={{ y: -4 }}
+                className="p-6 bg-secondary/30 rounded-2xl border border-border/50 hover:bg-secondary/50 hover:border-primary/30 transition-all group"
+              >
                 <div className="flex justify-between items-start mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                    {app.examId ? <GraduationCap className="w-5 h-5 text-primary" /> : <Briefcase className="w-5 h-5 text-primary" />}
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-700 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                    {app.examId ? (
+                      <GraduationCap className="w-5 h-5 text-primary" />
+                    ) : (
+                      <Briefcase className="w-5 h-5 text-primary" />
+                    )}
                   </div>
                   <span className={cn(
                     "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                    app.status === 'Pending' ? 'bg-amber-100 text-amber-700 border-amber-200' :
-                    app.status === 'Offered' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
-                    'bg-blue-100 text-blue-700 border-blue-200'
+                    app.status === "Pending" ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400" :
+                    app.status === "Offered" ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400" :
+                    "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400"
                   )}>
                     {app.status}
                   </span>
                 </div>
-                <h4 className="font-bold text-foreground mb-1 truncate">
+                <h4 className="font-bold text-foreground mb-1 truncate group-hover:text-primary transition-colors">
                   {app.examId ? app.examName : app.job?.title || "Application"}
                 </h4>
                 <p className="text-xs text-muted-foreground font-medium mb-4">
                   {app.examId ? "KEA Karnataka" : app.job?.company || "Company"}
                 </p>
                 <div className="pt-4 border-t border-border/50 flex justify-between items-center">
-                   <span className="text-[10px] font-black text-muted-foreground uppercase">Applied On</span>
+                   <span className="text-[10px] font-black text-muted-foreground uppercase">Applied</span>
                    <span className="text-xs font-bold text-foreground">
-                     {new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                     {new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
                    </span>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.section>
       )}
 
       {/* Main Content Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16">
 
         {/* IT Sector */}
         <motion.section variants={itemVariants}>
@@ -353,7 +504,7 @@ export default function Dashboard() {
           />
           <div className="grid grid-cols-1 gap-6">
             {itJobs.map(job => <JobCard key={job.id} job={job} />)}
-            {itJobs.length === 0 && <p className="text-muted-foreground italic text-center py-10 bg-secondary/20 rounded-3xl border border-dashed border-border">No IT roles currently featured.</p>}
+            {itJobs.length === 0 && <p className="text-muted-foreground italic text-center py-10 bg-secondary/20 rounded-3xl border border-dashed border-border">No IT roles available.</p>}
           </div>
         </motion.section>
 
@@ -367,7 +518,7 @@ export default function Dashboard() {
           />
           <div className="grid grid-cols-1 gap-6">
             {nonItJobs.map(job => <JobCard key={job.id} job={job} />)}
-            {nonItJobs.length === 0 && <p className="text-muted-foreground italic text-center py-10 bg-secondary/20 rounded-3xl border border-dashed border-border">No Corporate roles featured.</p>}
+            {nonItJobs.length === 0 && <p className="text-muted-foreground italic text-center py-10 bg-secondary/20 rounded-3xl border border-dashed border-border">No Corporate roles available.</p>}
           </div>
         </motion.section>
 
@@ -381,7 +532,7 @@ export default function Dashboard() {
           />
           <div className="grid grid-cols-1 gap-6">
             {stateGovtJobs.map(job => <JobCard key={job.id} job={job} />)}
-            {stateGovtJobs.length === 0 && <p className="text-muted-foreground italic text-center py-10 bg-secondary/20 rounded-3xl border border-dashed border-border">No State Govt roles featured.</p>}
+            {stateGovtJobs.length === 0 && <p className="text-muted-foreground italic text-center py-10 bg-secondary/20 rounded-3xl border border-dashed border-border">No State Govt roles available.</p>}
           </div>
         </motion.section>
 
@@ -395,7 +546,7 @@ export default function Dashboard() {
           />
           <div className="grid grid-cols-1 gap-6">
             {centralGovtJobs.map(job => <JobCard key={job.id} job={job} />)}
-            {centralGovtJobs.length === 0 && <p className="text-muted-foreground italic text-center py-10 bg-secondary/20 rounded-3xl border border-dashed border-border">No Central Govt roles featured.</p>}
+            {centralGovtJobs.length === 0 && <p className="text-muted-foreground italic text-center py-10 bg-secondary/20 rounded-3xl border border-dashed border-border">No Central Govt roles available.</p>}
           </div>
         </motion.section>
 

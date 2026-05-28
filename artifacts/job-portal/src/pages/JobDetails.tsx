@@ -19,8 +19,8 @@ import { Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 
 export default function JobDetails() {
-  const [, params] = useRoute("/jobs/:id");
-  const jobId = Number(params?.id);
+  const [, params] = useRoute("/jobs/:id") as any;
+  const jobId = params?.id ? Number(params.id) : NaN;
   const { toast } = useToast();
   const { user } = useAuth();
 

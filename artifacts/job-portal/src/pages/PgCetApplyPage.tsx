@@ -12,8 +12,8 @@ import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 export default function PgCetApplyPage() {
-  const [, params] = useRoute("/exams/:id/apply");
-  const examId = Number(params?.id);
+  const [, params] = useRoute("/exams/:id/apply") as any;
+  const examId = params?.id ? Number(params.id) : NaN;
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { user, isLoading: isAuthLoading } = useAuth();

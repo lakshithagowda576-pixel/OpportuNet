@@ -64,8 +64,8 @@ const RatingInput = ({
 )
 
 export default function CompanyReviews() {
-  const params = useParams()
-  const companyId = parseInt(params?.companyId as string)
+  const params = useParams() as any
+  const companyId = params?.companyId ? parseInt(params.companyId as string) : NaN
 
   useEffect(() => {
     trackEvent({

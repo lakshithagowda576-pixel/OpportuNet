@@ -25,8 +25,8 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function JobApplications() {
-  const [, params] = useRoute("/jobs/:id/applications");
-  const jobId = Number(params?.id);
+  const [, params] = useRoute("/jobs/:id/applications") as any;
+  const jobId = params?.id ? Number(params.id) : NaN;
 
   useEffect(() => {
     trackEvent({
