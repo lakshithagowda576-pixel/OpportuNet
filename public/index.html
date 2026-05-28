@@ -12,6 +12,34 @@
     <link rel="stylesheet" crossorigin href="/assets/index-DW2h-IrD.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
+    <div id="backend-status" style="position:fixed;right:12px;bottom:12px;z-index:9999;background:#0f172a;color:#ecfeff;padding:10px 14px;border-radius:8px;font-family:Inter,system-ui,Arial,sans-serif;box-shadow:0 6px 18px rgba(2,6,23,0.3);font-size:13px">
+      <strong>Backend:</strong>
+      <span id="backend-status-text" style="margin-left:8px">Checking…</span>
+    </div>
+
+    <script>
+      async function fetchBackendStatus() {
+        try {
+          const res = await fetch('/api/health', { credentials: 'include' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const json = await res.json();
+          const el = document.getElementById('backend-status-text');
+          if (json && (json.status === 'ok' || json.status === 'OK' || json.status === 'Ok')) {
+            el.textContent = 'Status: OK';
+            el.style.color = '#9be7a0';
+          } else {
+            el.textContent = 'Status: ' + (json?.status ?? 'unknown');
+            el.style.color = '#fbbf24';
+          }
+        } catch (err) {
+          const el = document.getElementById('backend-status-text');
+          el.textContent = 'Unavailable';
+          el.style.color = '#f87171';
+        }
+      }
+      fetchBackendStatus();
+      setInterval(fetchBackendStatus, 10000);
+    </script>
   </body>
 </html>
